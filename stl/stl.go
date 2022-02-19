@@ -1,15 +1,44 @@
 package stl
 
+import (
+	"github.com/deadsy/sdfx/render"
+	"github.com/deadsy/sdfx/sdf"
+	"os"
+	"path/filepath"
+)
+
+//#region Rendering
+
+// RenderSTL renders the given sdf.SDF3 model into a STL using the given RenderSettings.
+func RenderSTL(s sdf.SDF3, rs RenderSettings) error {
+	// Prepare the dest
+	if err := os.MkdirAll(filepath.Dir(rs.DestSTL), os.ModePerm); err != nil {
+		return err
+	}
+
+	// Render the SDF
+	render.RenderSTL(sdf.ScaleUniform3D(s, rs.Shrink()), rs.MeshCells, rs.DestSTL)
+	return nil
+}
+
+//#endregion Rendering
+
 //#region Settings
 
-// PrintSettings hold settings for the stl, such as material.
-type PrintSettings struct {
-	// The material being printed with.
+// RenderSettings carries the settings for rendering the built model.
+type RenderSettings struct {
+	// DestSTL identifies the file that the STL is generated to.
+	DestSTL string
+
+	// MeshCells identifies the number of cells on the longest axis.
+	MeshCells int
+
+	// Material identifies the material being printed in, making adjustments to the rendered STL.
 	Material Material
 }
 
 // Shrink returns the shrinkage for the current material.
-func (s PrintSettings) Shrink() float64 {
+func (s RenderSettings) Shrink() float64 {
 	return s.Material.Shrinkage
 }
 
