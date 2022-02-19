@@ -22,6 +22,15 @@ type TrackballSocket struct {
 
 	// TopPlateClearance specifies the clearance between the top plate and the trackball, at the topmost point.
 	TopPlateClearance float64
+
+	// BTUCount is the number of BTUs to cut holes for.
+	BTUCount int
+
+	// BTUOffsetZ sets the vertical offset for the ring of BTU holes.
+	BTUOffsetZ float64
+
+	// The BTU settings for individual BTUs.
+	BTU BTU
 }
 
 // TrackballSocketRender holds the options for rendering the trackball socket.
@@ -52,6 +61,12 @@ func (s TrackballSocket) Render(r TrackballSocketRender) (sdf.SDF3, error) {
 		return nil, err
 	}
 	socket = sdf.Union3D(socket, topPlate)
+
+	// Cut out the holes for the BTUs
+	socket, err = s.cutBTUHoles(socket, r)
+	if err != nil {
+		return nil, err
+	}
 
 	// Add the trackball
 	if r.RenderTrackball {
@@ -120,6 +135,96 @@ func (s TrackballSocket) renderTopPlate(r TrackballSocketRender) (sdf.SDF3, erro
 
 	// Return the top plate
 	return topPlate, nil
+}
+
+// cutBTUHoles cuts holes for the BTUs into the socket.
+func (s TrackballSocket) cutBTUHoles(b sdf.SDF3, r TrackballSocketRender) (sdf.SDF3, error) {
+	// Render the pegs for the holes for the BTUs
+	const pegHeight = 20
+	btuPegs, err := s.RenderBTUPegs(pegHeight, r)
+	if err != nil {
+		return nil, err
+	}
+
+	// Cut the holes for the BTUs in the socket
+	socket := sdf.Difference3D(b, btuPegs)
+
+	// Return the updated socket
+	return socket, nil
+}
+
+// RenderBTUs renders the BTUs for the socket (instead of the holes).
+func (s TrackballSocket) RenderBTUs(r TrackballSocketRender) (sdf.SDF3, error) {
+	return s.rotBTUs(func() (sdf.SDF3, error) {
+		return s.BTU.Render(BTURender{
+			Settings: r.Settings,
+		})
+	}, r)
+}
+
+func (s TrackballSocket) RenderBTUPegs(h float64, r TrackballSocketRender) (sdf.SDF3, error) {
+	return s.rotBTUs(func() (sdf.SDF3, error) {
+		return s.BTU.RenderPeg(h, BTURender{
+			Settings: r.Settings,
+		})
+	}, r)
+}
+
+// rotBTUs generates BTUs (or their holes), rotating around the trackball and pointing to its center.
+func (s TrackballSocket) rotBTUs(genBTU func() (sdf.SDF3, error), r TrackballSocketRender) (sdf.SDF3, error) {
+	// Work out the radius of our sphere at the given height (from the bottom)
+	radius := radiusAtDistFromCenter(s.TrackballR, s.TrackballR-s.BTUOffsetZ)
+	ms := make([]sdf.SDF3, s.BTUCount)
+
+	// Render each BTU
+	ai := float64(360) / float64(s.BTUCount)
+	for i := 0; i < s.BTUCount; i++ {
+		// Work out the maths for the rotations
+		deg := ai * float64(i)
+
+		// Render the BTU
+		btu, err := genBTU()
+		if err != nil {
+			return nil, err
+		}
+
+		// Work out the elevation to point the BTUs at the center of the trackball
+		centerElev := s.TrackballR - s.BTUOffsetZ
+		yRad := math.Atan2(radius, centerElev)
+		yDeg := radToDeg(yRad)
+		yRad = degToRad(yDeg)
+
+		// Rotational magics all around the ball
+		btu = sdf.Transform3D(btu, sdf.Translate3d(sdf.V3{Z: s.BTU.TotalH / -2}))
+		btu = sdf.Transform3D(btu, sdf.RotateY(yRad))
+		btu = sdf.Transform3D(btu, sdf.Translate3d(sdf.V3{X: radius * -1}))
+		btu = sdf.Transform3D(btu, sdf.RotateZ(degToRad(deg)))
+
+		// Add the BTU to our collection
+		ms[i] = btu
+	}
+
+	// Merge all our BTUs together
+	m := sdf.Union3D(ms...)
+
+	// Move the ring of BTUs down to cradle the trackball
+	m = sdf.Transform3D(m, sdf.Translate3d(sdf.V3{Z: (s.TrackballR * -1) + s.BTUOffsetZ}))
+
+	// Send the rendered BTUs
+	return m, nil
+}
+
+func degToRad(deg float64) float64 {
+	return deg * (math.Pi / 180)
+}
+
+func radToDeg(rad float64) float64 {
+	return rad / (math.Pi / 180)
+}
+
+// radiusAtDistFromCenter calculates the radius of a cross-section of a sphere at the given distance from the center.
+func radiusAtDistFromCenter(radius float64, distance float64) float64 {
+	return math.Sqrt(math.Pow(radius, 2) - math.Pow(distance, 2))
 }
 
 // socketOuterRadius calculates the outer radius for the socket, and other components (like the top plate).

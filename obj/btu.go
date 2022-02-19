@@ -60,6 +60,18 @@ func (b *BTU) Render(r BTURender) (sdf.SDF3, error) {
 	btu := sdf.Union3D(base, head)
 	btu = sdf.Union3D(btu, ball)
 
+	// For dev purposes, put a bead on the "north" side of the BTU
+	const beadR = 0.5
+	bead, err := sdf.Sphere3D(beadR)
+	if err != nil {
+		return nil, err
+	}
+	bead = sdf.Transform3D(bead, sdf.Translate3d(sdf.V3{X: b.HeadR - beadR - 0.1, Y: 0, Z: (b.BaseH + b.HeadH + beadR) / 2}))
+	btu = sdf.Union3D(btu, bead)
+
+	// Move the whole model to recenter it
+	btu = sdf.Transform3D(btu, sdf.Translate3d(sdf.V3{Z: (b.TotalH - b.BaseH) / -2}))
+
 	// Return what we built
 	return btu, nil
 }

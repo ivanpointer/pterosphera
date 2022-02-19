@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/deadsy/sdfx/sdf"
 	"github.com/ivanpointer/pterosphera/obj"
 	"github.com/ivanpointer/pterosphera/render"
 	"log"
@@ -40,12 +39,52 @@ func init() {
 
 			TopPlateHeight:    5,
 			TopPlateClearance: 0.6,
+
+			BTUCount:   3,
+			BTUOffsetZ: 6,
+			BTU: obj.BTU{
+				BaseR: 12.7 / 2,
+				BaseH: 6.8,
+
+				HeadR: 14.5 / 2,
+				HeadH: 1,
+
+				BallR:  8.4 / 2,
+				TotalH: 10.4,
+			},
 		},
 	}
 }
 
 func main() {
-	// Build the model
+	if err := renderTrackballSocket(); err != nil {
+		log.Fatalf("error: %v", err)
+	}
+}
+
+func renderTrackballSocket() error {
+	// Render the socket
+	m, err := pterosphera.TrackballSocket.Render(obj.TrackballSocketRender{
+		RenderTrackball: false,
+
+		Settings: renderSettings,
+	})
+	if err != nil {
+		return err
+	}
+
+	/*tb, err := pterosphera.TrackballSocket.RenderTrackball()
+	if err != nil {
+		return err
+	}
+	m = sdf.Union3D(m, tb)*/
+
+	// Render the model into an STL
+	return render.RenderSTL(m, renderSettings)
+}
+
+func renderBTU() error {
+	// Build the BTU
 	btu := obj.BTU{
 		BaseR: 12.7 / 2,
 		BaseH: 6.8,
@@ -60,19 +99,9 @@ func main() {
 		Settings: renderSettings,
 	})
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		return err
 	}
 
 	// Render the model into an STL
-	if err := render.RenderSTL(m, renderSettings); err != nil {
-		log.Fatalf("error: %v", err)
-	}
-}
-
-func renderTrackballSocket() (sdf.SDF3, error) {
-	return pterosphera.TrackballSocket.Render(obj.TrackballSocketRender{
-		RenderTrackball: false,
-
-		Settings: renderSettings,
-	})
+	return render.RenderSTL(m, renderSettings)
 }
