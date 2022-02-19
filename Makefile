@@ -9,5 +9,7 @@ build:
 run: build
 	./bin/pterosphera
 
+render: run
+
 watch:
-	fswatch -0 **/*.go | xargs -0 -n 1 -I {} make run
+	fswatch -0 **/*.go | xargs -0 -n 1 -I {} make run || true
