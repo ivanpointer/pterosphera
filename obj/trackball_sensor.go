@@ -27,12 +27,21 @@ type TrackballSensorMount struct {
 
 	// BaseD defines the depth of the sensor mount base.
 	BaseD float64
+
+	// SensorClearance defines how much area to cut away for the card being mounted to the plate.
+	SensorClearance float64
+
+	// LensHoleR is the radius of the hole for the sensor lens.
+	LensHoleR float64
 }
 
 // TrackballSensorMountRender holds the render options for the trackball sensor mount.
 type TrackballSensorMountRender struct {
 	// Settings are the general render settings.
 	Settings render.RenderSettings
+
+	// ForCut signals that the sensor mount is being rendered as a die for cutting out of another model.
+	ForCut bool
 }
 
 // Render renders the trackball sensor mount.
@@ -43,17 +52,38 @@ func (m TrackballSensorMount) Render(r TrackballSensorMountRender) (sdf.SDF3, er
 		return nil, err
 	}
 
-	// Render the screw holes
-	sh, err := m.renderScrewHoles(r)
-	if err != nil {
-		return nil, err
+	if !r.ForCut {
+		// Set up the screw holes
+		sh, err := m.renderScrewHoles(r)
+		if err != nil {
+			return nil, err
+		}
+
+		// Set up the lens hole
+		lh, err := m.renderLensHole(r)
+		if err != nil {
+			return nil, err
+		}
+
+		// Join the holes, and cut from the base
+		h := sdf.Union3D(sh, lh)
+		sm := sdf.Difference3D(b, h)
+
+		// Send it
+		return sm, nil
+	} else {
+		// Render the hole for the sensor lens
+		sh, err := m.renderLensHole(r)
+		if err != nil {
+			return nil, err
+		}
+
+		// Merge the sensor hole onto the base
+		b = sdf.Union3D(b, sh)
+
+		// Send the die
+		return b, nil
 	}
-
-	// Cut the screw holes out of the base
-	sm := sdf.Difference3D(b, sh)
-
-	// Send the built mount
-	return sm, nil
 }
 
 func (m TrackballSensorMount) renderScrewHoles(r TrackballSensorMountRender) (sdf.SDF3, error) {
@@ -76,12 +106,25 @@ func (m TrackballSensorMount) renderScrewHole(r TrackballSensorMountRender) (sdf
 	return sdf.Cone3D(m.ScrewDepth+r.Settings.WeldShift, m.ScrewRBottom, m.ScrewRTop, 0)
 }
 
+func (m TrackballSensorMount) renderLensHole(r TrackballSensorMountRender) (sdf.SDF3, error) {
+	// Render the hole
+	height := m.BaseD * 4
+	return sdf.Cylinder3D(height, m.LensHoleR, 0)
+}
+
 func (m TrackballSensorMount) renderSensorMount(r TrackballSensorMountRender) (sdf.SDF3, error) {
 	// Build the base
-	b, err := sdf.Box3D(sdf.V3{X: m.sensorMountWidth(), Y: m.BaseH, Z: m.BaseD}, 0)
+	depth := m.BaseD
+	if r.ForCut {
+		depth = m.BaseD + m.SensorClearance
+	}
+	b, err := sdf.Box3D(sdf.V3{X: m.sensorMountWidth(r), Y: m.BaseH, Z: depth}, 0)
 	if err != nil {
 		return nil, err
 	}
+
+	// Move the base down to zero
+	b = sdf.Transform3D(b, sdf.Translate3d(sdf.V3{Z: depth / -2}))
 
 	// Screw walls
 	sw, err := m.renderScrewWalls(r)
@@ -115,7 +158,7 @@ func (m TrackballSensorMount) renderScrewWalls(r TrackballSensorMountRender) (sd
 }
 
 func (m TrackballSensorMount) renderScrewWall() (sdf.SDF3, error) {
-	h := m.ScrewDepth + m.ScrewMargin
+	h := m.screwHoleWallHeight()
 	sw, err := sdf.Cylinder3D(h, m.ScrewRTop+m.ScrewMargin, m.ScrewMargin)
 	if err != nil {
 		return nil, err
@@ -126,7 +169,15 @@ func (m TrackballSensorMount) renderScrewWall() (sdf.SDF3, error) {
 	return sw, nil
 }
 
-func (m TrackballSensorMount) sensorMountWidth() float64 {
+func (m TrackballSensorMount) screwHoleWallHeight() float64 {
+	return m.ScrewDepth + m.ScrewMargin
+}
+
+func (m TrackballSensorMount) sensorMountWidth(r TrackballSensorMountRender) float64 {
 	screwDia := (m.ScrewRTop + m.ScrewMargin) * 2
-	return m.ScrewDist + (screwDia * 2)
+	w := m.ScrewDist + (screwDia * 2)
+	if r.ForCut {
+		w = w - r.Settings.WeldShift
+	}
+	return w
 }

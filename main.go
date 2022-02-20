@@ -23,7 +23,7 @@ func init() {
 	// Set up our render settings
 	renderSettings = render.RenderSettings{
 		DestSTL:   "bin/stl/pterophera.stl",
-		MeshCells: 150,
+		MeshCells: 300,
 
 		Material: render.MaterialPLA,
 
@@ -41,7 +41,7 @@ func init() {
 			TopPlateClearance: 0.6,
 
 			BTUCount:   3,
-			BTUOffsetZ: 6,
+			BTUOffsetZ: 7.1,
 			BTU: obj.BTU{
 				BaseR: 12.7 / 2,
 				BaseH: 6.8,
@@ -62,13 +62,18 @@ func init() {
 
 				BaseH: 21,
 				BaseD: 1.5,
+
+				SensorClearance: 10,
+				LensHoleR:       4.5,
 			},
+			SensorDistFromBall: 1.6,
+			SensorAngleY:       -11,
 		},
 	}
 }
 
 func main() {
-	if err := renderSensorMount(); err != nil {
+	if err := renderTrackballSocket(); err != nil {
 		log.Fatalf("error: %v", err)
 	}
 }
@@ -89,6 +94,10 @@ func renderTrackballSocket() error {
 }
 
 func renderSensorMount() error {
+	/*// Render a flat plain for center
+	c, _ := sdf.Box3D(sdf.V3{X: 80, Y: 80, Z: 1}, 0)
+	c = sdf.Transform3D(c, sdf.Translate3d(sdf.V3{Z: 0.7}))*/
+
 	// Render the sensor mount
 	m, err := pterosphera.TrackballSocket.SensorMount.Render(obj.TrackballSensorMountRender{
 		Settings: renderSettings,
@@ -96,6 +105,9 @@ func renderSensorMount() error {
 	if err != nil {
 		return err
 	}
+
+	// Merge the plane to the mount
+	//m = sdf.Union3D(m, c)
 
 	// Convert to STL
 	return render.RenderSTL(m, renderSettings)

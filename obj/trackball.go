@@ -34,6 +34,12 @@ type TrackballSocket struct {
 
 	// SensorMount are the settings for rendering the sensor mount.
 	SensorMount TrackballSensorMount
+
+	// SensorDistFromBall is the desired distance between the sensor lens and the ball.
+	SensorDistFromBall float64
+
+	// SensorAngleY is the angle to rotate the sensor mount around the socket.
+	SensorAngleY float64
 }
 
 // TrackballSocketRender holds the options for rendering the trackball socket.
@@ -67,6 +73,12 @@ func (s TrackballSocket) Render(r TrackballSocketRender) (sdf.SDF3, error) {
 
 	// Cut out the holes for the BTUs
 	socket, err = s.cutBTUHoles(socket, r)
+	if err != nil {
+		return nil, err
+	}
+
+	// Attach the sensor mount
+	socket, err = s.renderSensorMount(socket, r)
 	if err != nil {
 		return nil, err
 	}
@@ -217,14 +229,6 @@ func (s TrackballSocket) rotBTUs(genBTU func() (sdf.SDF3, error), r TrackballSoc
 	return m, nil
 }
 
-func degToRad(deg float64) float64 {
-	return deg * (math.Pi / 180)
-}
-
-func radToDeg(rad float64) float64 {
-	return rad / (math.Pi / 180)
-}
-
 // radiusAtDistFromCenter calculates the radius of a cross-section of a sphere at the given distance from the center.
 func radiusAtDistFromCenter(radius float64, distance float64) float64 {
 	return math.Sqrt(math.Pow(radius, 2) - math.Pow(distance, 2))
@@ -235,4 +239,55 @@ func (s TrackballSocket) socketOuterRadius() float64 {
 	return s.TrackballR + s.WallThickness + s.SocketClearance
 }
 
+// renderSensorMount renders the sensor mount for the trackball.
+func (s TrackballSocket) renderSensorMount(socket sdf.SDF3, r TrackballSocketRender) (sdf.SDF3, error) {
+	// Render the die for cutting the hole for the mount
+	die, err := s.renderSensorMountInt(socket, true, r)
+	if err != nil {
+		return nil, err
+	}
+	skt := sdf.Difference3D(socket, die)
+
+	// Render the sensor mount and weld it in
+	sm, err := s.renderSensorMountInt(socket, false, r)
+	if err != nil {
+		return nil, err
+	}
+	skt = sdf.Union3D(skt, sm)
+
+	// Send the unified model!
+	return skt, nil
+}
+
+// renderSensorMount renders the sensor mount for the trackball.
+func (s TrackballSocket) renderSensorMountInt(socket sdf.SDF3, forCut bool, r TrackballSocketRender) (sdf.SDF3, error) {
+	// Render the sensor mount
+	sm, err := s.SensorMount.Render(TrackballSensorMountRender{
+		Settings: r.Settings,
+		ForCut:   forCut,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Move the mount into position
+	sm = sdf.Transform3D(sm, sdf.Translate3d(sdf.V3{Z: (s.TrackballR + s.SensorDistFromBall) * -1}))
+	sm = sdf.Transform3D(sm, sdf.RotateY(degToRad(s.SensorAngleY)))
+
+	// Send it!
+	return sm, nil
+}
+
 //#endregion Socket
+
+//#region Helpers
+
+func degToRad(deg float64) float64 {
+	return deg * (math.Pi / 180)
+}
+
+func radToDeg(rad float64) float64 {
+	return rad / (math.Pi / 180)
+}
+
+//#endregion Helpers
