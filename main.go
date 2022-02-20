@@ -69,13 +69,37 @@ func init() {
 			SensorDistFromBall: 1.6,
 			SensorAngleY:       -11,
 		},
+
+		Switches: obj.MXSwitchSocket{
+			SocketWH:     13.9,
+			SideTabW:     5.8,
+			SideTabsDist: 1,
+
+			SocketDepth:   5,
+			TopPlateDepth: 1.4,
+
+			ClipHoleW: 5,
+			ClipHoleH: 2.5,
+			ClipHoleD: 1.2,
+		},
 	}
 }
 
 func main() {
-	if err := renderTrackballSocket(); err != nil {
+	if err := renderSwitchSocket(); err != nil {
 		log.Fatalf("error: %v", err)
 	}
+}
+
+func renderSwitchSocket() error {
+	m, err := pterosphera.Switches.Render(obj.MXSwitchSocketRender{
+		Settings: renderSettings,
+	})
+	if err != nil {
+		return err
+	}
+
+	return render.RenderSTL(m, renderSettings)
 }
 
 func renderTrackballSocket() error {
