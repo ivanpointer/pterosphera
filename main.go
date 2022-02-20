@@ -52,12 +52,23 @@ func init() {
 				BallR:  8.4 / 2,
 				TotalH: 10.4,
 			},
+
+			SensorMount: obj.TrackballSensorMount{
+				ScrewDist:    24,
+				ScrewRTop:    3.1 / 2,
+				ScrewRBottom: 2.8 / 2,
+				ScrewMargin:  1.1,
+				ScrewDepth:   3.7,
+
+				BaseH: 21,
+				BaseD: 1.5,
+			},
 		},
 	}
 }
 
 func main() {
-	if err := renderTrackballSocket(); err != nil {
+	if err := renderSensorMount(); err != nil {
 		log.Fatalf("error: %v", err)
 	}
 }
@@ -73,13 +84,20 @@ func renderTrackballSocket() error {
 		return err
 	}
 
-	/*tb, err := pterosphera.TrackballSocket.RenderTrackball()
+	// Render the model into an STL
+	return render.RenderSTL(m, renderSettings)
+}
+
+func renderSensorMount() error {
+	// Render the sensor mount
+	m, err := pterosphera.TrackballSocket.SensorMount.Render(obj.TrackballSensorMountRender{
+		Settings: renderSettings,
+	})
 	if err != nil {
 		return err
 	}
-	m = sdf.Union3D(m, tb)*/
 
-	// Render the model into an STL
+	// Convert to STL
 	return render.RenderSTL(m, renderSettings)
 }
 

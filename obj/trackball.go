@@ -31,6 +31,9 @@ type TrackballSocket struct {
 
 	// The BTU settings for individual BTUs.
 	BTU BTU
+
+	// SensorMount are the settings for rendering the sensor mount.
+	SensorMount TrackballSensorMount
 }
 
 // TrackballSocketRender holds the options for rendering the trackball socket.
