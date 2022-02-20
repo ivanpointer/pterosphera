@@ -1,5 +1,10 @@
 # pterosphera
 
+## Strategy
+I'm having trouble choosing between OpenSCAD and Go for this.  OpenSCAD produces "crisper" models that are a lot smaller on disk, but is a weaker language.  The particular library I've picked in golang leverages a stronger language, but produces "mushy" models that are huge.
+
+I'm pausing on my work on the Go strategy, and revisiting how I'm generating the curve of switches to see if I can get a solution there...
+
 ## Building
 `make run`
 

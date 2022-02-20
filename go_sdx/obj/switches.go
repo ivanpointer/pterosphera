@@ -84,6 +84,9 @@ func (s MXSwitchSocket) renderSocketHole(r MXSwitchSocketRender) (sdf.SDF3, erro
 
 	socket = sdf.Union3D(socket, plate)
 
+	// Move the whole model down to align with the plane
+	socket = sdf.Transform3D(socket, sdf.Translate3d(sdf.V3{Z: ((s.SocketDepth / 2) + s.TopPlateDepth) * -1}))
+
 	// Send it!
 	return socket, nil
 }

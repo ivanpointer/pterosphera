@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/deadsy/sdfx/sdf"
 	"github.com/ivanpointer/pterosphera/obj"
 	"github.com/ivanpointer/pterosphera/render"
 	"log"
@@ -92,12 +93,20 @@ func main() {
 }
 
 func renderSwitchSocket() error {
+
 	m, err := pterosphera.Switches.Render(obj.MXSwitchSocketRender{
 		Settings: renderSettings,
 	})
 	if err != nil {
 		return err
 	}
+
+	c, err := sdf.Box3D(sdf.V3{100, 100, 2}, 0)
+	if err != nil {
+		return err
+	}
+	c = sdf.Transform3D(c, sdf.Translate3d(sdf.V3{Z: 1}))
+	m = sdf.Union3D(m, c)
 
 	return render.RenderSTL(m, renderSettings)
 }
