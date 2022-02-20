@@ -174,7 +174,7 @@ func (m TrackballSensorMount) screwHoleWallHeight() float64 {
 }
 
 func (m TrackballSensorMount) sensorMountWidth(r TrackballSensorMountRender) float64 {
-	screwDia := (m.ScrewRTop + m.ScrewMargin) * 2
+	screwDia := m.ScrewRTop + m.ScrewMargin
 	w := m.ScrewDist + (screwDia * 2)
 	if r.ForCut {
 		w = w - r.Settings.WeldShift
