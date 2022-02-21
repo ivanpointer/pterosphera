@@ -1,12 +1,8 @@
 include <../switches/mx.scad>
 include <../BOSL2/std.scad>
 
-// The clearance underneath the socket - for generating the walls.
-switch_socket_clearance = mx_socket_perim_WH;
-
-// How thick the walls of the case should be.
-case_wall_thickness = 4;
-
+// The offset for the bevel around the columns ( [X/Y, Z] )
+case_col_offset = [ 8, 4 ];
 
 module switch_col_arc(count, home_row, radius, debug = false) {
     _switch_col_arc(count, home_row, radius, debug);
@@ -15,27 +11,34 @@ module switch_col_arc(count, home_row, radius, debug = false) {
 // Render a single arced column of switches (sockets)
 // Note: home row is counted from 0, so a value of 2 means that there would be two switches above the switch that is designated as "home row".
 module _switch_col_arc(count, home_row, radius, debug = false) {
+    // TODO: The arc angle (degrees) needs to be calculated from the radius coming in, not the radius plus the full key height - this is to ensure enough spacing for the head of the keycap...
+    // TODO: The top of the plate needs to be offset by the height between the keycap and the plate, not the full height of the key, which sits below the top of the plate.
 
-    // Render a reference point
-    if (debug) color("black") sphere(1);
-
-    // Label the numbers if in dev mode
-    if (debug) {
-        for (i = [0:len(points)-1]) {
-            color("blue") translate(points[i]) text3d(str(i), 3, 6);
-        }
-    }
-    
     // Render the arc of switch bases
     pts = switch_col_pts(count,home_row,radius,0);
     fcs = switch_base_faces(count);
     polyhedron(points = pts, faces = fcs);
+
+    // DEBUG STUFF:
+    // ------------
+    // Render a reference point
+    if (debug) color("black") sphere(1);
+
+    // Number the points if in dev mode
+    if (debug) {
+        for (i = [0:len(pts)-1]) {
+            color("blue") translate(pts[i]) text3d(str(i), 2, 4);
+        }
+    }
 }
 
-function _col_rt(r) = r + mx_switch_full_height;
+function _col_rt(r) = r + (mx_switch_full_height - mx_socket_total_D);
 function _col_rb(r) = _col_rt(r) + mx_socket_total_D;
-function _col_a(r) = asin(mx_socket_perim_H / _col_rt(r));
-function _col_ao(c,h,r) = 90 + (_col_a(r) * (c - (h - 1))) + (_col_a(r) / 2);
+function _col_a(r) = asin(mx_socket_perim_H / r);
+function _col_ao(c,h,r) =
+    90 // Rotate over to the right quadrant
+    + (_col_a(r) * c) // Rotate counter-clockwise for each switch
+    + (_col_a(r) * (h - c + 0.5)); // Rotate forward to bring the home switch onto the bottom
 function _col_angles(c,h,r) = [ _col_rt(r), _col_rb(r), _col_a(r), _col_ao(c,h,r) ];
 function switch_col_pts(c,h,r,y) = _switch_col_join(
     _switch_col_pts_y(col_arc_pts(c,h,r), y),
