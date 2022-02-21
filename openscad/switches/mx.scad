@@ -15,7 +15,7 @@ include <../common.scad>
 // Means that distance between centers of two keys should be 19mm +/-0.05mm.
 // And sum of distances between centers of 11 keys should be 190mm +/-0.05mm, not 190.5mm.
 
-// switch_full_height = 19.2; // Measured from base to top of keycap (excluding the pins) - calibrated to a DSA row 3 keycap.
+mx_switch_full_height = 19.2; // Measured from base to top of keycap (excluding the pins) - calibrated to a DSA row 3 keycap.
 
 // // Amoeba Mount
 // Distance between center of screws
@@ -27,12 +27,13 @@ am_screw_hole_thck = 1.1; // The thickness of the screw hole wall
 am_screw_hole_D = 3.7; // The height of the insert,
 
 
-// mx_socket_color = "purple";
 // The width/height of the hole for a MX switch
 mx_socket_WH = 13.9;
 
 // The width/height of the perimiter of the socket, from which the hole is cut.
 mx_socket_perim_WH = am_screw_dist;
+mx_socket_perim_W = mx_socket_perim_WH;
+mx_socket_perim_H = mx_socket_perim_WH;
 
 // The total depth of the socket for a MX swith - the distance below the surface of the plate that the switch's bottom rests - I.E. where the PCB/hotswap socket sits.
 mx_socket_total_D = 5;
@@ -178,3 +179,5 @@ function mx_hole_base_W() = mx_socket_WH + (mx_tabs_Y_mgn * 2);
 function mx_hole_H() = mx_hole_base_H() + (mx_clip_hole_H * 2);
 function mx_hole_base_H() = mx_socket_WH;
 function mx_hole_base_D() = mx_socket_total_D - mx_top_plate_D + weld_mgn;
+
+function mx_socket_bounding_box() = [mx_socket_perim_W, mx_socket_perim_H, mx_socket_total_D];

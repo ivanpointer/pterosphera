@@ -61,3 +61,6 @@ module dcolor(c) {
         children();
     }
 }
+
+r2d2 = 180 / PI;
+function r2d(r) = r * r2d2;

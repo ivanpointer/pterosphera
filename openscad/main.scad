@@ -1,5 +1,6 @@
 use <switches/mx.scad>
 use <trackball/trackball_socket.scad>
+use <switches/col_arc.scad>
 
 // Model definition - the higher the more faces/smooth
 $fn = 360 / 20; // degrees per face
@@ -8,8 +9,9 @@ $fn = 360 / 20; // degrees per face
 $dcolor = false;
 
 // Center the models
-center = true;
+center = false;
 
 // Render!!
-
-mx_socket(center);
+pinky_R = 41.5;
+home_row = 3;
+switch_col_arc(4, home_row, pinky_R);
