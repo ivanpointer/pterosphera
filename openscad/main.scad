@@ -1,12 +1,14 @@
 use <switches/mx.scad>
 use <trackball/trackball_socket.scad>
-use <switches/col_arc.scad>
+use <bodies/col_arc.scad>
 
 // Model definition - the higher the more faces/smooth
 $fn = 360 / 20; // degrees per face
 
+$pdebug = true;
+
 // Enable debug coloring
-$dcolor = false;
+$dcolor = $pdebug;
 
 // Center the models
 center = false;
