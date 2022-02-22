@@ -29,7 +29,7 @@ for(fi=[0:len(hand_right)-1]) {
     f=hand_right[fi];
     for(c=[0:f[2]-1]) {
         of = o(hand_right,fi);
-        exof = fi > 0 && c == 0 ? finger_col_offset : 0;
+        exof = fi > 0 ? finger_col_offset : 0;
         pv = fi > 0 ? hand_right[fi-1] : [];
         xof = f[0];
         yof = ((of + c) * -mx_socket_perim_W) - (exof * fi);
