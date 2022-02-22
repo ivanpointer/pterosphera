@@ -1,5 +1,13 @@
 # Pterosphera V2
 
+## Build Log
+### Tue Feb 22
+![Tue Feb 22 progress](../docs/build_log/2022-02-22_11-11-55.png)
+
+I've got the column generation down, including joining the columns together.  In order to do this, I had to use a combined strategy of generating the individual points and faces (and wrapping with `hull()`), to generate the objects.  This is because a simple polyhedron doesn't perform well when you try to use `difference()` on it.  With `hull()`, you only have to define two opposing faces - further simplifying it.
+
+Now that I'm using this strategy of individual points, it will make rendering the MX holes into the plate much easier, and I have points to work off of for generating the body of the case!
+
 ## Trackball Socket
 
 ### Printing Notes

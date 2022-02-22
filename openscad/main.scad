@@ -29,11 +29,11 @@ o = home_row;
 f_sca = function(h) [
     for(fi=[0:len(h)-1])
         for(c=[0:h[fi][2]-1])
-            [ h[fi][3], o, h[fi][1], h[fi][0], f_yo(h,fi,c), c ] ];
+            [ h[fi][3], o, h[fi][1], h[fi][0], f_yo(h,fi,c), c + 1, h[fi][2] ] ];
 
 cv = f_sca(hand_right);
 for(ci=[0:len(cv)-1]) {
-    switch_col_arc(cv[ci], ci > 0 ? cv[ci-1] : [], debug);
+    switch_col_arc(cv[ci], ci < len(cv)-1 ? cv[ci+1] : [], debug);
 }
 
 /*for(fi=[0:len(hand_right)-1]) {
