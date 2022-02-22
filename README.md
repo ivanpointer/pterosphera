@@ -1,6 +1,6 @@
 # Pterosphera V2
 
-## Build Strategy
+## Strategy
 I'm having trouble choosing between OpenSCAD and Go for this.  OpenSCAD produces "crisper" models that are a lot smaller on disk, but is a weaker language.  The particular library I've picked in golang leverages a stronger language, but produces "mushy" models that are huge.
 
 I'm pausing on my work on the Go strategy, and revisiting how I'm generating the curve of switches to see if I can get a solution there...
@@ -14,34 +14,20 @@ I've got the column generation down, including joining the columns together.  In
 
 Now that I'm using this strategy of individual points, it will make rendering the MX holes into the plate much easier, and I have points to work off of for generating the body of the case!
 
-## Trackball Socket
+## Printing Notes
 
-### Printing Notes
+### Trackball Socket
 When printing stand-alone:
 
   * Print with the socket opening face-down - the sensor mount will be upward/on the top.  Use a brim, and use tree supports.
 
-## Switch Sockets
+### Switch Sockets
 These are designed for MX style switches, with:
 
   * Cutouts for opening the switch in-board, so we can solder in place, and take off the top part of the switch.  This likely won't be used, ever, but it doesn't hurt to have.
   * Notches in (under) the top plate so that the clips on the switches will grab the plate, making it so that they are more secure, and require a tool to remove.
   * Screw hole sockets (for heat-insert), for the Amoeba 1u PCB (Amoeba-royale v2.0 - https://github.com/JKing-B16/keyboard-pcbs/tree/master/amoeba-royale)
 
-### Printing Notes
-When printing stand-alone:
+#### When printing stand-alone:
 
   * Print with the top-plate down on the glass bed, with a brim.  Use tree supports.
-
-
-
-
-## Building
-`make run`
-
-## Watching
-For quick iterations on Mac, install `fswatch` (via homebrew), then:
-
-```make watch```
-
-This will rebuild every time a Go file changes.  Open finder in gallery mode to the STL to watch it change as you make your edits.

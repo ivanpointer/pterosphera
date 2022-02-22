@@ -1,6 +1,8 @@
 include <../switches/mx.scad>
 include <../BOSL2/std.scad>
 
+finger_col_offset = 3; // An additional offset between each finger's columns
+
 // Render a single arced column of switches (sockets)
 // Note: home row is counted from 0, so a value of 2 means that there would be two switches above the switch that is designated as "home row".
 module switch_col_arc(a,na,debug = false) {

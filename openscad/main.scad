@@ -1,61 +1,40 @@
 include <switches/mx.scad>
 use <trackball/trackball_socket.scad>
-use <bodies/col_arc_2.scad>
+include <bodies/col_arc_2.scad>
 include <BOSL2/std.scad>
 
-// Model definition - the higher the more faces/smooth
-$fn = 360 / 20; // degrees per face
+main();
 
-debug = true;
+module main() {
+    // Model definition - the higher the more faces/smooth
+    $fn = 360 / 20; // degrees per face
 
-// Center the models
-center = false;
+    debug = true;
 
-// Render!!
-home_row = 3;
-finger_col_offset = 3; // An additional offset between each finger's columns
+    // Center the models
+    center = false;
 
-hand_right = [
-    // X offset, radius, columns, rows
-    [ 49.8, 48.2, 2, 4 ], // Index
-    [ 53.2, 55.0, 1, 5 ], // Middle 
-    [ 51.0, 51.5, 1, 5 ], // Ring
-    [ 38.1, 41.5, 2, 4 ]  // Pinky
-];
+    // Render!!
+    home_row = 3;
 
-f_o = function(v,x,n=0) n > x - 1 ? 0 : v[n][2] + f_o(v,x,n+1);
-f_yo = function(h,fi,c) ((f_o(h,fi) + c) * -mx_socket_perim_W) - ((fi > 0 ? finger_col_offset : 0) * fi);
-o = home_row;
-f_sca = function(h) [
-    for(fi=[0:len(h)-1])
-        for(c=[0:h[fi][2]-1])
-            [ h[fi][3], o, h[fi][1], h[fi][0], f_yo(h,fi,c), c + 1, h[fi][2] ] ];
+    hand_right = [
+        // X offset, radius, columns, rows
+            [ 49.8, 48.2, 2, 4 ], // Index
+            [ 53.2, 55.0, 1, 5 ], // Middle
+            [ 51.0, 51.5, 1, 5 ], // Ring
+            [ 38.1, 41.5, 2, 4 ]  // Pinky
+        ];
 
-cv = f_sca(hand_right);
-for(ci=[0:len(cv)-1]) {
-    switch_col_arc(cv[ci], ci < len(cv)-1 ? cv[ci+1] : [], debug);
+    cv = swith_col_args(hand_right,home_row);
+    for(ci=[0:len(cv)-1]) {
+        switch_col_arc(cv[ci], ci < len(cv)-1 ? cv[ci+1] : [], debug);
+    }
 }
 
-/*for(fi=[0:len(hand_right)-1]) {
-    f=hand_right[fi];
-    for(c=[0:f[2]-1]) {
-        of = f_o(hand_right,fi);
-        exof = fi > 0 ? finger_col_offset : 0;
-        pv = fi > 0 ? hand_right[fi-1] : [];
-        xof = f[0];
-        yof = ((of + c) * -mx_socket_perim_W) - (exof * fi);
-        switch_col_arc(f[3], home_row, f[1], pv, xof, yof, debug);*/
-
-// ((of + c) * -mx_socket_perim_W) - (exof * fi)
-
-// for(fi=[0:len(hand_right)-1]) {
-//     f=hand_right[fi];
-//     for(c=[0:f[2]-1]) {
-//         of = f_o(hand_right,fi);
-//         exof = ;
-//         pv = fi > 0 ? hand_right[fi-1] : [];
-//         xof = f[0];
-//         yof = ;
-//         switch_col_arc(f[3], home_row, f[1], pv, xof, yof, debug);
-//     }
-// }
+function swith_col_args(h,o) = [
+    for(fi=[0:len(h)-1])
+        for(c=[0:h[fi][2]-1])
+    [ h[fi][3], o, h[fi][1], h[fi][0], y_offset(h,fi,c), c + 1, h[fi][2] ]
+];
+function y_offset(h,fi,c) = ((col_no(h,fi) + c) * -mx_socket_perim_W) - ((fi > 0 ? finger_col_offset : 0) * fi);
+function col_no(v,x,n=0) =  n > x - 1 ? 0 : v[n][2] + col_no(v,x,n+1);
