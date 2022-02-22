@@ -62,5 +62,30 @@ module dcolor(c,debug=false) {
     }
 }
 
+// Radian conversion
 r2d2 = 180 / PI;
 function r2d(r) = r * r2d2;
+
+// Join matricies together
+function concat_mx(m) = [ for(i=m) for(j=i) j ];
+
+// Helpers for finding the highest coordinates within matrices
+OUTER_LOW = 0;
+OUTER_HIGH = 1;
+
+// Two points, top back left, and bottom back right - defining all bounds of a matrix of points
+function boundingPair(m) = [
+        [ outerX(m,c=OUTER_LOW).x, outerY(m,c=OUTER_LOW).y, outerZ(m,c=OUTER_LOW).z ], // Bottom-front-left
+        [ outerX(m,c=OUTER_HIGH).x, outerY(m,c=OUTER_HIGH).y, outerZ(m,c=OUTER_HIGH).z ] // Top-back-right
+];
+
+function bounding_coords(m) = [ bounding_coordsC(m,c=OUTER_HIGH), bounding_coordsC(m,c=OUTER_LOW) ];
+function bounding_coordsC(m,c) = [ outerX(m,c=c),outerY(m,c=c),outerZ(m,c=c) ];
+
+function outerX(m,c=OUTER_HIGH) = outerQ(m,0,c=c);
+function outerY(m,c=OUTER_HIGH) = outerQ(m,1,c=c);
+function outerZ(m,c=OUTER_HIGH) = outerQ(m,2,c=c);
+function outerQ(m,q,c=OUTER_HIGH,i=0) = i < len(m) - 1 ? _c(m[i],outerQ(m,q,c,i+1),q,c) : m[i];
+function _c(crnt,chlng,q,c=OUTER_HIGH) = c == OUTER_HIGH
+    ? (crnt[q] > chlng[q] ? crnt : chlng)
+    : (crnt[q] < chlng[q] ? crnt : chlng);

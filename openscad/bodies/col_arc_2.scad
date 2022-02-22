@@ -1,13 +1,12 @@
 include <../switches/mx.scad>
 include <../BOSL2/std.scad>
+use <../lib/utils.scad>
 
 finger_col_offset = 3; // An additional offset between each finger's columns
 
 // Render a single arced column of switches (sockets)
 // Note: home row is counted from 0, so a value of 2 means that there would be two switches above the switch that is designated as "home row".
 module switch_col_arc(a,na,debug = false) {
-    echo("a,na",a,na);
-    
     // Grab our arguments
     n = a[0];
     o = a[1];
@@ -49,26 +48,27 @@ _RIGHT = 4002;
 _TOP = 4003;
 _BOTTOM = 4004;
 
+// Generate all points for the column
+function all_col_pts(n,o,r,xof,yof,i=0) = i < n -1 ? concat_mx([switch_points(i,o,r,xof,yof), all_col_pts(n,o,r,xof,yof,i+1)]) : switch_points(i,o,r,xof,yof);
+
 function join_poly(s1,s2) = [
     concat_mx([
-        switch_poly_points(s1[0],s1[1],s1[2],s1[3],s1[4],_LEFT), switch_poly_points(s2[0],s2[1],s2[2],s2[3],s2[4],_RIGHT)
+        switch_points_face(s1[0],s1[1],s1[2],s1[3],s1[4],_LEFT), switch_points_face(s2[0],s2[1],s2[2],s2[3],s2[4],_RIGHT)
     ]), // points
     [ [0,1,2,3], [4,5,6,7] ] // faces
 ];
 
 function switch_poly(n,o,r,xof,yof) = [ // switch number, home-row index, finger radius, x-offset (length of first finger bone), y-offset (where the column starts)
-    concat_mx([
-        switch_poly_points(n,o,r,xof,yof,_LEFT), switch_poly_points(n,o,r,xof,yof,_RIGHT)
-    ]), // points
+    switch_points(n,o,r,xof,yof), // points
     [ [0,1,2,3], [4,5,6,7] ] // faces
 ];
-// Join matricies together
-function concat_mx(m) = [ for(i=m) for(j=i) j ];
+
+function switch_points(n,o,r,xof,yof) = concat_mx([switch_points_face(n,o,r,xof,yof,_LEFT), switch_points_face(n,o,r,xof,yof,_RIGHT)]);
 
 function switch_poly_face(n,o,r,xof,yof,face) = [ // switch number, home-row index, finger radius, x-offset (length of first finger bone), y-offset (where the column starts), which face to get (left,right)
-    switch_poly_points(n,o,r,xof,yof,face), [0,1,2,3]
+    switch_points_face(n,o,r,xof,yof,face), [0,1,2,3]
 ];
-function switch_poly_points(n,o,r,xof,yof,face) = [ // switch number, home-row index, finger radius, x-offset, y-offset for left face, which face the points are for (left or right)
+function switch_points_face(n,o,r,xof,yof,face) = [ // switch number, home-row index, finger radius, x-offset, y-offset for left face, which face the points are for (left or right)
     sp(n,o,r,xof,syof(yof,face),_TOP), sp(n+1,o,r,xof,syof(yof,face),_TOP), sp(n+1,o,r,xof,syof(yof,face),_BOTTOM), sp(n,o,r,xof,syof(yof,face),_BOTTOM)
 ];
 function syof(yof,face) = face == _LEFT ? yof : (face == _RIGHT ? yof + mx_socket_perim_W : 0);
