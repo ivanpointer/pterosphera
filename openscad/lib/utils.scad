@@ -54,8 +54,8 @@ module down_if(dist, cond = false) {
 }
 
 $dcolor = false;
-module dcolor(c) {
-    if ($dcolor) {
+module dcolor(c,debug=false) {
+    if ($dcolor || debug) {
         color(c) children();
     } else {
         children();
