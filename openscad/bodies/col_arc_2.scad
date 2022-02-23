@@ -2,11 +2,15 @@ include <../switches/mx.scad>
 include <../BOSL2/std.scad>
 use <../lib/utils.scad>
 
-finger_col_offset = 3; // An additional offset between each finger's columns
+finger_col_offset = mx_socket_total_D; // An additional offset between each finger's columns
+
+// The margin beyond the backmost edge of the columns to build the top part of the case
+case_top_margin = 5;
+case_wall_thickness = 4;
 
 // Render a single arced column of switches (sockets)
 // Note: home row is counted from 0, so a value of 2 means that there would be two switches above the switch that is designated as "home row".
-module switch_col_arc(a,na,debug = false) {
+module switch_col_arc(a,na,bp,debug = false) {
     // Grab our arguments
     n = a[0];
     o = a[1];
@@ -17,15 +21,15 @@ module switch_col_arc(a,na,debug = false) {
     cc = a[6];
 
     // Colors for debugging
-    clr = ["red","blue","green","purple", "yellow", "cyan", "white"];
+    clr = ["red","blue","green","purple", "cyan", "white"];
 
-    // Walk up, creating each switch plate
+    // Render the switch plates, starting at the top and walking down the arc
     n_na = na[0] ? na[0] : 0;
     scount = n >= n_na ? n : n_na;
     for (i=[0:scount-1]) {
         dcolor(clr[i%len(clr)],debug) {
+            // Build the switch surface (only if this col has this number of swtiches)
             if (i < n) {
-                // Build the switch surface (only if this col has this number of swtiches)
                 sp = switch_poly(i,o,r,xof,yof);
                 hull() polyhedron(points = sp[0], faces = sp[1]);
             }
@@ -41,7 +45,36 @@ module switch_col_arc(a,na,debug = false) {
             };
         }
     }
+
+    // Build out the top/back of the row
+    switchColBack(a,na,bp,debug);
 }
+
+module switchColBack(a,na,bp,debug=false) {
+    pts = concat_mx([ topEdgePoints(a), topEdgePoints(a,mx_socket_perim_W) ]);
+
+    fcs = [
+        [0,3,5,2],
+        [1,4,5,2]
+    ];
+    color("yellow") hull() polyhedron(points = pts, faces = fcs);
+
+    if(len(na) > 0) {
+        jpts = concat_mx([ topEdgePoints(na,mx_socket_perim_W), topEdgePoints(a) ]);
+        //for(p=[0:len(jpts)-1]) translate(jpts[p]) text3d(str(p), 2, 6);
+        color("yellow") hull() polyhedron(points = jpts, faces = [
+            [0,1,2],
+            [3,4,5]
+        ]);
+    }
+
+    backWallX = bp[1].x + case_top_margin;
+    echo(backWallX);
+}
+
+function topEdgePoints(a,yo=0) = _topEdgePoints(sp(0,a[1],a[2],a[3],a[4]+yo,_TOP), sp(0,a[1],a[2],a[3],a[4]+yo,_BOTTOM));
+
+function _topEdgePoints(t,b) = [ t, b, [ b.x, b.y, b.z + case_wall_thickness ] ];
 
 _LEFT = 4001;
 _RIGHT = 4002;
