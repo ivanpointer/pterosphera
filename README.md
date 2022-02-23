@@ -7,12 +7,19 @@ I'm pausing on my work on the Go strategy, and revisiting how I'm generating the
 
 ## Build Log
 
+### Wed Feb 23
+
+Last night I struggled a bit getting the traditional DM bevel on the top part of this.  I saw on Reddit a Dactyl-style board that had a bevel that inset the keys a bit.  Inspired by this, I've created a top bevel that may be easier to work with for the back of the case - especially when it comes time to generate the holes for the cables.
+
+![Wed Feb 23 progress](docs/build_log/2022-02-23_09-02-37.png)
+
 ### Tue Feb 22
-![Tue Feb 22 progress](docs/build_log/2022-02-22_11-11-55.png)
 
 I've got the column generation down, including joining the columns together.  In order to do this, I had to use a combined strategy of generating the individual points and faces (and wrapping with `hull()`), to generate the objects.  This is because a simple polyhedron doesn't perform well when you try to use `difference()` on it.  With `hull()`, you only have to define two opposing faces - further simplifying it.
 
 Now that I'm using this strategy of individual points, it will make rendering the MX holes into the plate much easier, and I have points to work off of for generating the body of the case!
+
+![Tue Feb 22 progress](docs/build_log/2022-02-22_11-11-55.png)
 
 ## Printing Notes
 

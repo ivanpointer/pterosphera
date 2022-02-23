@@ -5,7 +5,7 @@ use <../lib/utils.scad>
 finger_col_offset = mx_socket_total_D; // An additional offset between each finger's columns
 
 // The margin beyond the backmost edge of the columns to build the top part of the case
-case_top_margin = 5;
+case_top_margin = 3;
 case_wall_thickness = 4;
 
 // Render a single arced column of switches (sockets)
@@ -50,7 +50,7 @@ module switch_col_arc(a,na,bp,debug = false) {
     switchColBack(a,na,bp,debug);
 }
 
-module switchColBack(a,na,bp,debug=false) {
+module switchColBack2(a,na,bp,debug=false) {
     pts = concat_mx([ topEdgePoints(a), topEdgePoints(a,mx_socket_perim_W) ]);
 
     fcs = [
@@ -72,9 +72,44 @@ module switchColBack(a,na,bp,debug=false) {
     echo(backWallX);
 }
 
+
+module switchColBack(a,na,bp,debug=false) {
+    pts = concat_mx([ topEdgePoints(a,-case_top_margin), topEdgePoints(a,mx_socket_perim_W+case_top_margin) ]);
+
+    fcs = [
+        [0,1,5,4],
+        [2,3,7,6]
+    ];
+    color("yellow") hull() polyhedron(points = pts, faces = fcs);
+
+    if(len(na) > 0) {
+        pts2 = concat_mx([ topEdgePoints(a,-case_top_margin), topEdgePoints(na,mx_socket_perim_W+case_top_margin) ]);
+        jpts = [
+            pts2[7], [ pts2[7].x, pts2[7].y - (case_top_margin * 2), pts2[7].z ],
+            pts2[4], [ pts2[4].x, pts2[4].y - case_top_margin, pts2[4].z ],
+            pts[0], [ pts[2].x, pts[2].y + (case_top_margin * 2), pts[2].z ],
+            pts[3], [ pts[3].x, pts[3].y + (case_top_margin * 2), pts[3].z ],
+            pts2[5], [ pts2[5].x, pts2[5].y - case_top_margin, pts2[5].z ],
+            pts2[6], [ pts2[6].x, pts2[6].y - case_top_margin, pts2[6].z ]
+        ];
+        jfcs = [
+            [0,1,3,2],
+            [5,7,6,4],
+            [2,8,0,10]
+        ];
+        * color("blue") for(p=[0:len(pts)-1]) translate([pts[p].x,pts[p].y,pts[p].z + 55]) text3d(str(p), 2, 6);
+        * color("purple") for(p=[0:len(pts2)-1]) translate([pts2[p].x,pts2[p].y,pts2[p].z + 40]) text3d(str(p), 2, 6);
+        * color("cyan") for(p=[0:len(jpts)-1]) translate([jpts[p].x,jpts[p].y,jpts[p].z + 25]) text3d(str(p), 2, 6);
+        color("yellow") hull() polyhedron(points = jpts, faces = jfcs);
+    }
+
+    backWallX = bp[1].x + case_top_margin;
+    echo(backWallX);
+}
+
 function topEdgePoints(a,yo=0) = _topEdgePoints(sp(0,a[1],a[2],a[3],a[4]+yo,_TOP), sp(0,a[1],a[2],a[3],a[4]+yo,_BOTTOM));
 
-function _topEdgePoints(t,b) = [ t, b, [ b.x, b.y, b.z + case_wall_thickness ] ];
+function _topEdgePoints(t,b) = [ t, b, [ t.x, t.y, t.z + case_top_margin ], [ b.x, b.y, t.z + case_top_margin ] ];
 
 _LEFT = 4001;
 _RIGHT = 4002;
