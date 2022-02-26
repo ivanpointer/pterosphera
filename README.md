@@ -7,6 +7,14 @@ I'm pausing on my work on the Go strategy, and revisiting how I'm generating the
 
 ## Build Log
 
+### Sat Feb 26
+
+Taking a couple steps back to be able to take a bunch forward.  I'm pulling back to double-down on my strategy of building
+all the vertices for the dish before rendering.  I'm using matrixes to simulate custom types, so that I can better calculate
+the points for the edges for building the case around the model.  I'm pretty happy with where it's landed so far.
+
+![Sat Feb 26 Progress](docs/build_log/2022-02-26_13-18-03.png)
+
 ### Wed Feb 23
 
 Last night I struggled a bit getting the traditional DM bevel on the top part of this.  I saw on Reddit a Dactyl-style board that had a bevel that inset the keys a bit.  Inspired by this, I've created a top bevel that may be easier to work with for the back of the case - especially when it comes time to generate the holes for the cables.

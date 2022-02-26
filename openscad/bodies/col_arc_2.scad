@@ -47,31 +47,13 @@ module switch_col_arc(a,na,bp,debug = false) {
     }
 
     // Build out the top/back of the row
-    switchColBack(a,na,bp,debug);
+    switchColBack2(a,na,bp,debug);
 }
 
 module switchColBack2(a,na,bp,debug=false) {
-    pts = concat_mx([ topEdgePoints(a), topEdgePoints(a,mx_socket_perim_W) ]);
-
-    fcs = [
-        [0,3,5,2],
-        [1,4,5,2]
-    ];
-    color("yellow") hull() polyhedron(points = pts, faces = fcs);
-
-    if(len(na) > 0) {
-        jpts = concat_mx([ topEdgePoints(na,mx_socket_perim_W), topEdgePoints(a) ]);
-        //for(p=[0:len(jpts)-1]) translate(jpts[p]) text3d(str(p), 2, 6);
-        color("yellow") hull() polyhedron(points = jpts, faces = [
-            [0,1,2],
-            [3,4,5]
-        ]);
-    }
-
-    backWallX = bp[1].x + case_top_margin;
-    echo(backWallX);
+    sp = switch_points(0,a[1],a[2],a[3],a[4]);
+    color("cyan") for(p=[0:len(sp)-1]) translate([sp[p].x,sp[p].y,sp[p].z + 25]) text3d(str(p), 2, 6);
 }
-
 
 module switchColBack(a,na,bp,debug=false) {
     pts = concat_mx([ topEdgePoints(a,-case_top_margin), topEdgePoints(a,mx_socket_perim_W+case_top_margin) ]);
