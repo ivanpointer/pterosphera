@@ -12,7 +12,9 @@ case_wall_thickness = 4;
 // Note: home row is counted from 0, so a value of 2 means that there would be two switches above the switch that is designated as "home row".
 module curvedSwitchColumn(colSpec,adjacentColSpec,debug = false) {
     // Colors for debugging
-    clr = ["red","blue","green","purple", "cyan", "white"];
+    colors = ["red","blue","green","purple", "cyan", "white"];
+    echo("col",colSpec);
+    echo("adj",adjacentColSpec);
 
     // Define the column
     col = newColumn(colSpec);
@@ -20,7 +22,7 @@ module curvedSwitchColumn(colSpec,adjacentColSpec,debug = false) {
     swLen = len(switches);
 
     // Work out the next column, if we need to weld them together
-    toWeld = getFingerPos(colSpec)[1] == 1 && len(adjacentColSpec) > 0;
+    toWeld = getColSpecFingerPos(colSpec)[1] == 1 && len(adjacentColSpec) > 0;
     adjCol = toWeld ? newColumn(adjacentColSpec) : [];
     adjSwitches = toWeld ? getColSwitches(adjCol) : [];
     adjLen = len(adjSwitches);
@@ -28,10 +30,13 @@ module curvedSwitchColumn(colSpec,adjacentColSpec,debug = false) {
 
     // Iterate over each switch in the column
     for(si=[0:weldLen]) {
+        // Colors!
+        clr=colors[si%len(colors)];
+
         // Render the switch
         if(si < swLen) {
             switch = switches[si];
-            color(clr[si%len(clr)])
+            color(clr)
                 hull()
                 polyhedron(
                     points = concat_mx([getSwitchFacePoints(switch,P_FCE_FRONT), getSwitchFacePoints(switch,P_FCE_BACK)]),
@@ -43,17 +48,26 @@ module curvedSwitchColumn(colSpec,adjacentColSpec,debug = false) {
         if(toWeld) {
             switch = switches[si < swLen ? si : swLen - 1];
             adjSwitch = adjSwitches[si < adjLen ? si : adjLen - 1];
-            faces = [ [0,1,2,3], [4,5,6,7] ];
-            color("slateGray") hull() polyhedron(
-                points = concat_mx([
-                    getSwitchFacePoints(switch,P_FCE_RIGHT),
-                    getSwitchFacePoints(adjSwitch,P_FCE_LEFT)
-                ]),
-                faces = faces
+            weldPoly = switchWeldPoly(
+                getSwitchFacePoints(switch,P_FCE_RIGHT),
+                getSwitchFacePoints(adjSwitch,P_FCE_LEFT));
+            color(clr) hull() polyhedron(
+                points = weldPoly[0],
+                faces = weldPoly[1]
             );
         }
     }
 }
+
+function switchWeldPoly(switchPts,adjSwitchPts) = [
+    concat_mx([switchPts, adjSwitchPts, [
+        [switchPts[2].x, switchPts[2].y + fingerMargin, switchPts[2].z], [switchPts[3].x, switchPts[3].y + fingerMargin, switchPts[3].z],
+        [adjSwitchPts[2].x, adjSwitchPts[2].y - fingerMargin, adjSwitchPts[2].z], [adjSwitchPts[3].x, adjSwitchPts[3].y - fingerMargin, adjSwitchPts[3].z]
+    ]]),
+    [
+        [0,1,2,3], [4,5,6,7], [2,3,8,9], [6,7,10,11]
+    ]
+];
 
 P_FCE_LEFT = 0;
 P_FCE_RIGHT = 1;
@@ -67,32 +81,6 @@ function _getSwitchFacePoints(points, face) = [ points[face[0]], points[face[1]]
 
 P_HAND_LEFT = 0;
 P_HAND_RIGHT = 1;
-
-/*
-  [ // dish
-    [ // columns - origin is assumed as 0,0,0
-        col no,
-        first/last col on finger: -1 first, 0 neither, 1 last,
-        first/last col on dish: -1 first, 0 neither, 1 last,
-        orientation (hand): 0 left, 1 right,
-        width,
-        offset: [x, y, z],
-        radius: [top, under],
-
-        switches: [ // switches - left/right, front/back, top/under
-          colNo
-          switchNo
-          switchPos: -1 first, 0 neither, 1 last
-          radius [finger, top, under]
-          angle [x, y, z],
-          offset [x, y, z],
-          points: [[l, f, t], [r, f, t], [l, b, t], [r, b, t], [l, f, u], [r, f, u], [l, b, u], [r, b, u]],
-          faces: [left, right, front, back, top, under]
-
-        ],
-    ]
-  ]
-*/
 
 // newColSpec builds a new column spec vector
 function newColSpec(colNo, fingerPos, dishPos, dishHand, colWidth, colOffset, fingerRadius, switchCount, switchHeight, homeRow) = [
@@ -150,27 +138,6 @@ function newColumnSwitches(colSpec) = [
 ];
 
 function newColumnSwitch(colSpec, switchNo) = [
-/*
-    switches: [ // switches - left/right, front/back, top/under
-        colNo
-        fingerPos
-        dishPos
-        dishHand
-        colWidth
-        colOffset
-        radiuses
-        angles
-
-        switchNo
-        switchPos: -1 first, 0 neither, 1 last
-
-        angle [x, y, z],
-        offset [x, y, z],
-        points: [[l, f, t], [r, f, t], [l, b, t], [r, b, t], [l, f, u], [r, f, u], [l, b, u], [r, b, u]],
-        faces: [left, right, front, back, top, under]
-    ],
-*/
-
     colSpec,
     switchNo,
     [ switchNo == 0 ? 1 : 0, switchNo == getColSpecSwitchCount(colSpec) - 1 ? 1 : 0 ], // Switch is first/is last
