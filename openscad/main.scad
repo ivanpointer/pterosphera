@@ -71,7 +71,7 @@ module keyboardHalf(handSpec,colWidth,debug=false) {
     columns = getDishSpecColumns(dishSpec);
     colCount = len(columns);
     for(ci=[0:colCount-1]) {
-        curvedSwitchColumn(columns[ci], (ci < colCount - 1 ? columns[ci+1] : []), debug);
+        curvedSwitchColumn(columns[ci], (ci < colCount - 1 ? columns[ci+1] : []), ci, debug);
     }
 }
 

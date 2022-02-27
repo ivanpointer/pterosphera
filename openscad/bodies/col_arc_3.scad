@@ -7,10 +7,11 @@ finger_col_offset = mx_socket_total_D; // An additional offset between each fing
 // The margin beyond the backmost edge of the columns to build the top part of the case
 case_top_margin = 3;
 case_wall_thickness = 4;
+case_bezel = 3;
 
 // Render a single arced column of switches (sockets)
 // Note: home row is counted from 0, so a value of 2 means that there would be two switches above the switch that is designated as "home row".
-module curvedSwitchColumn(colSpec,adjacentColSpec,debug = false) {
+module curvedSwitchColumn(colSpec,adjacentColSpec,colNo,debug = false) {
     // Colors for debugging
     colors = ["red","blue","green","purple", "cyan", "white"];
     echo("col",colSpec);
@@ -29,7 +30,7 @@ module curvedSwitchColumn(colSpec,adjacentColSpec,debug = false) {
     weldLen = toWeld ? swLen > adjLen ? swLen - 1 : adjLen - 1 : swLen;
 
     // Iterate over each switch in the column
-    for(si=[0:weldLen]) {
+    union() for(si=[0:weldLen]) {
         // Colors!
         clr=colors[si%len(colors)];
 
@@ -57,6 +58,59 @@ module curvedSwitchColumn(colSpec,adjacentColSpec,debug = false) {
             );
         }
     }
+
+    // Top Bezel
+    topSwitch = switches[0];
+    topPoints = getSwitchFacePoints(topSwitch,P_FCE_FRONT);
+    bzPoints = bezelPoints(topPoints);
+    * if(getColSpecNo(colSpec) == 0) plotPoints(bzPoints);
+
+    color("cyan") hull() polyhedron(
+        points = bzPoints,
+        faces = [
+            [1,5,7,3],[4,0,2,6]
+        ]
+    );
+
+    if(adjLen > 0) {
+        adjTopSwitch = adjSwitches[0];
+        adjTopPoints = getSwitchFacePoints(adjTopSwitch,P_FCE_FRONT);
+        adjBzPoints = bezelPoints(adjTopPoints);
+        * plotPoints(bzPoints);
+        * plotPoints(adjBzPoints,clr="cyan",offsets=[0,0,2]);
+        bzWeldPoints = [
+            bzPoints[1],bzPoints[3],bzPoints[5],bzPoints[7],
+            adjBzPoints[0],adjBzPoints[2],adjBzPoints[4],adjBzPoints[6],
+            //[bzPoints[1].x, adjBzPoints[0].y, bzPoints[1].z],[bzPoints[5].x, adjBzPoints[4].y, bzPoints[5].z],
+            [bzPoints[3].x, adjBzPoints[2].y, bzPoints[3].z],[bzPoints[7].x, adjBzPoints[6].y, bzPoints[7].z],
+            [adjBzPoints[2].x, adjBzPoints[2].y - fingerMargin, adjBzPoints[2].z],[adjBzPoints[6].x, adjBzPoints[6].y - fingerMargin, adjBzPoints[6].z],
+        ];
+        * plotPoints(bzWeldPoints);
+
+        // ]
+        // if(getColSpecNo(colSpec) == 0) {
+        //     plotPoints(bzWeldPoints);
+        //     points = bzWeldPoints,
+        color("cyan") hull() polyhedron(
+            points = bzWeldPoints,
+            faces = [
+                [0,1,2,3],[1,3,8,9],
+                [4,5,6,7],[5,7,10,11]
+            ]
+        );
+    }
+}
+
+function bezelPoints(topPoints) = concat_mx([
+    topPoints,
+    [
+        for(p=topPoints)
+            [p.x + case_bezel, p.y, p.z]
+    ]
+]);
+
+module plotPoints(points,clr="blue",offsets=[0,0,0]) {
+    color(clr) for(p=[0:len(points)-1]) translate([points[p].x + offsets.x, points[p].y + offsets.y, points[p].z + offsets.z]) text3d(str(p),0.5,1);
 }
 
 function switchWeldPoly(switchPts,adjSwitchPts) = [
