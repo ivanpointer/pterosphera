@@ -10,23 +10,48 @@ case_wall_thickness = 4;
 
 // Render a single arced column of switches (sockets)
 // Note: home row is counted from 0, so a value of 2 means that there would be two switches above the switch that is designated as "home row".
-module switch_col_arc(colSpec,adjacentColSpec,debug = false) {
+module curvedSwitchColumn(colSpec,adjacentColSpec,debug = false) {
     // Colors for debugging
     clr = ["red","blue","green","purple", "cyan", "white"];
 
     // Define the column
     col = newColumn(colSpec);
+    switches = getColSwitches(col);
+    swLen = len(switches);
+
+    // Work out the next column, if we need to weld them together
+    toWeld = getFingerPos(colSpec)[1] == 1 && len(adjacentColSpec) > 0;
+    adjCol = toWeld ? newColumn(adjacentColSpec) : [];
+    adjSwitches = toWeld ? getColSwitches(adjCol) : [];
+    adjLen = len(adjSwitches);
+    weldLen = toWeld ? swLen > adjLen ? swLen - 1 : adjLen - 1 : swLen;
 
     // Iterate over each switch in the column
-    switches = getColSwitches(col);
-    for(si=[0:len(switches)-1]) {
-        switch = switches[si];
-        color(clr[si%len(clr)])
-            hull()
-            polyhedron(
-                points = concat_mx([getSwitchFacePoints(switch,P_FCE_FRONT), getSwitchFacePoints(switch,P_FCE_BACK)]),
-                faces = [ [0,1,2,3], [4,5,6,7] ]
+    for(si=[0:weldLen]) {
+        // Render the switch
+        if(si < swLen) {
+            switch = switches[si];
+            color(clr[si%len(clr)])
+                hull()
+                polyhedron(
+                    points = concat_mx([getSwitchFacePoints(switch,P_FCE_FRONT), getSwitchFacePoints(switch,P_FCE_BACK)]),
+                    faces = [ [0,1,2,3], [4,5,6,7] ]
+                );
+        }
+
+        // Weld the switch
+        if(toWeld) {
+            switch = switches[si < swLen ? si : swLen - 1];
+            adjSwitch = adjSwitches[si < adjLen ? si : adjLen - 1];
+            faces = [ [0,1,2,3], [4,5,6,7] ];
+            color("slateGray") hull() polyhedron(
+                points = concat_mx([
+                    getSwitchFacePoints(switch,P_FCE_RIGHT),
+                    getSwitchFacePoints(adjSwitch,P_FCE_LEFT)
+                ]),
+                faces = faces
             );
+        }
     }
 }
 

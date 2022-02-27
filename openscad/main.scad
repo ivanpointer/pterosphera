@@ -24,6 +24,11 @@ rightHand = newHandSpec(
     ]
 );
 
+function reverseVector(v) = _reverseVector(v,len(v));
+function _reverseVector(v,m) = [
+    for(i=[0:m]) v[m-i]
+];
+
 function newHandSpec(hand,fingers) = [ hand, fingers ];
 function getHandSide(handSpec) = handSpec[0];
 function getHandFingers(handSpec) = handSpec[1];
@@ -35,7 +40,7 @@ function getFingerColCount(fingerSpec) = fingerSpec[2];
 function getFingerSwitchCount(fingerSpec) = fingerSpec[3];
 function getFingerName(fingerSpec) = fingerSpec[4];
 
-fingerMargin = 1;
+fingerMargin = 1.5;
 
 // MAIN
 module main() { 
@@ -58,13 +63,26 @@ module keyboardHalf(handSpec,colWidth,debug=false) {
     // for(ci=[0:len(cv)-1]) {
     //     switch_col_arc(cv[ci], ci < len(cv)-1 ? cv[ci+1] : [], debug);
     // }
+
+    // Flip the right hand fingers
+    hs = getHandSide(handSpec) == P_HAND_LEFT ? handSpec : reverseHand(handSpec);
+
     dishSpec = newDishSpec(handSpec, colWidth, fingerMargin, mx_socket_perim_H, home_row);
     columns = getDishSpecColumns(dishSpec);
     colCount = len(columns);
     for(ci=[0:colCount-1]) {
-        switch_col_arc(columns[ci], (ci < colCount - 1 ? columns[ci+1] : []),debug);
+        curvedSwitchColumn(columns[ci], (ci < colCount - 1 ? columns[ci+1] : []), debug);
     }
 }
+
+function genCols(colSpecs) = [
+    for(c=colSpecs) newColumn(c)
+];
+
+function reverseHand(handSpec) = [
+    getHandSide(handSpec),
+    reverseVector(getHandFingers(handSpec))
+];
 
 function newDishSpec(handSpec, colWidth, fingerMargin, switchHeight, homeRow) = _newDishSpec(handSpec, getHandColCount(handSpec), colWidth, fingerMargin, switchHeight, homeRow);
 function _newDishSpec(handSpec, colCount, colWidth, fingerMargin, switchHeight, homeRow) = [
