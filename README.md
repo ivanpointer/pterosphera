@@ -9,9 +9,10 @@ I'm pausing on my work on the Go strategy, and revisiting how I'm generating the
 
 ### Fri Mar 4
 
-Hit a good milestone - am now generating a super plausible back side of the case.
+Finished working out the easier sides of the case (back and outer edge).  The next part is going to be a bit tougher,
+as it's about time to start working out how the thumb clusters work, including with the trackball socket.
 
-![Fri Mar 4 Progress](docs/build_log/2022-03-04_13-51-55.png)
+![Fri Mar 4 Progress](docs/build_log/2022-03-04_16-45-36.png)
 
 ### Sat Feb 26
 

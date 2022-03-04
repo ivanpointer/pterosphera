@@ -26,7 +26,7 @@ rightHand = newHandSpec(
 
 function reverseVector(v) = _reverseVector(v,len(v));
 function _reverseVector(v,m) = [
-    for(i=[0:m]) v[m-i]
+    for(i=[0:m-1]) v[m-i-1]
 ];
 
 function newHandSpec(hand,fingers) = [ hand, fingers ];
@@ -57,7 +57,7 @@ module keyboardHalf(handSpec,colWidth,debug=false) {
     hs = getHandSide(handSpec) == P_HAND_LEFT ? handSpec : reverseHand(handSpec);
 
     // Work out the dish spec
-    dishSpec = newDishSpec(handSpec, colWidth, fingerMargin, mx_socket_perim_H, home_row);
+    dishSpec = newDishSpec(hs, colWidth, fingerMargin, mx_socket_perim_H, home_row);
     
     // Work out the deepest point for calculating the bottom of the case
     allRads = getAllRadiuses(dishSpec);
@@ -129,12 +129,6 @@ function getColOffset(fingerSpec, colIndex, colWidth, fingerIndex, fingerMargin)
     [getFingerXOffset(fingerSpec), getColYOffset(colIndex, colWidth, fingerIndex, fingerMargin), 0];
 function getColYOffset(colIndex, colWidth, fingerIndex, fingerMargin) = ((colIndex * colWidth) + (fingerIndex * fingerMargin));
 
-// // Get all points for the main switch area for the board
-// function allDishPoints(v,i=0) = i < len(v) -1
-//     ? concat_mx([all_finger_points(v[i]), allDishPoints(v,i+1)])
-//     : all_finger_points(v[i]);
-// function all_finger_points(m,i=0) = i < len(m) - 1 ? concat_mx([all_col_pts(m[0],m[1],m[2],m[3],m[4]), all_finger_points(m,i+1)]) : all_col_pts(m[0],m[1],m[2],m[3],m[4]);
-
 // Generate the arguments expected by the column arc methods, with the proper offsets
 function switch_col_args(h,o) = [
     for(fi=[0:len(h)-1])
@@ -144,9 +138,6 @@ function switch_col_args(h,o) = [
 
 // Work out the proper offset for the given column
 function y_offset(h,fi,c) = ((col_no(h,fi) + c) * -mx_socket_perim_W) - ((fi > 0 ? finger_col_offset : 0) * fi);
-
-// Recursive function to work out the column number, based on the profile set (some fingers get more than one column, and the matrix's first dimension is based on fingers)
-// function col_no(v,x,n=0) =  n > x - 1 ? 0 : v[n][2] + col_no(v,x,n+1);
 
 function getColNo(fingers,currentFinger,i=0) = i < currentFinger ? getFingerColCount(fingers[i]) + getColNo(fingers,currentFinger,i+1) : 0;
 

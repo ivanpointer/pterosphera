@@ -6,9 +6,9 @@ finger_col_offset = mx_socket_total_D; // An additional offset between each fing
 
 // The margin beyond the backmost edge of the columns to build the top part of the case
 case_top_margin = 3;
-case_wall_thickness = 4;
+case_wall_thickness = 3;
 case_bezel = 3;
-case_back_taper = [8,4]; // the x,z drop of the taper on the back.
+dish_edge_taper = [8,4]; // the x,z drop of the taper on the dish walls.
 case_bottom_plate_thickness = 3;
 
 // Render a single arced column of switches (sockets)
@@ -45,7 +45,7 @@ module curvedSwitchColumn(colSpec,adjacentColSpec,colNo,caseBottom,debug = false
                 );
         }
 
-        // Weld the switch
+        // Weld the switch to the next column
         if(toWeld) {
             switch = switches[si < swLen ? si : swLen - 1];
             adjSwitch = adjSwitches[si < adjLen ? si : adjLen - 1];
@@ -56,6 +56,107 @@ module curvedSwitchColumn(colSpec,adjacentColSpec,colNo,caseBottom,debug = false
                 points = weldPoly[0],
                 faces = weldPoly[1]
             );
+        }
+
+        // Render the outer edge
+        if(colNo == 0 && si < swLen) {
+            switch = switches[si];
+            facePts = getSwitchFacePoints(switch,P_FCE_LEFT);
+            bzPts = concat_mx([
+                facePts,
+                offsetPoints([facePts[0],facePts[1]], [0,-dish_edge_taper[0]+case_wall_thickness, -dish_edge_taper[1]]),
+                offsetPoints([facePts[2],facePts[3]], [0,-dish_edge_taper[0], -dish_edge_taper[1]])
+            ]);
+            color(clr) hull() polyhedron(
+                points = bzPts,
+                faces = [
+                    [0,1,2,3],[4,5,6,7]
+                ]
+            );
+
+            wallTopPoints = [
+                bzPts[4],bzPts[5],bzPts[6],bzPts[7]
+            ];
+
+            inWallPoints = concat_mx([
+                wallTopPoints,
+                fixPoints(wallTopPoints,["","",caseBottom])
+            ]);
+
+            wallPoints = concat_mx([
+                inWallPoints,
+                [
+                    [inWallPoints[6].x, inWallPoints[4].y, inWallPoints[4].z],
+                    [inWallPoints[2].x, inWallPoints[0].y, inWallPoints[2].z]
+                ]
+            ]);
+            
+            color(clr) hull() polyhedron(
+                points = wallPoints,
+                faces = [
+                    [0,1,3,2],[4,5,7,6],[2,6,8,9]
+                ]
+            );
+
+            *plotPoints(facePts);
+            *plotPoints(bzPts);
+            *plotPoints(wallPoints,clr="purple");
+
+            // Weld the corner
+            if(si == 0) {
+                // Work out the edge points
+                bzPoints = topBezelPoints(col);
+                bzEdgePoints = [ bzPoints[4],bzPoints[5],bzPoints[6],bzPoints[7] ];
+                edgeFrontPoints = offsetPoints( bzEdgePoints, [dish_edge_taper[0], 0, -dish_edge_taper[1]] );
+                edgePoints = concat_mx([
+                    bzEdgePoints,edgeFrontPoints
+                ]);
+
+                // Build the back wall points from the edge, to the case bottom
+                backWallPoints = [
+                    edgePoints[4],edgePoints[5],edgePoints[6],edgePoints[7],
+                    [edgePoints[4].x, edgePoints[4].y, caseBottom],
+                    [edgePoints[5].x, edgePoints[5].y, caseBottom],
+                    [edgePoints[6].x, edgePoints[6].y, caseBottom],
+                    [edgePoints[7].x, edgePoints[7].y, caseBottom]
+                ];
+
+                bp = concat_mx([
+                    bzPoints,
+                    backWallPoints
+                ]);
+                sp = wallPoints;
+
+                wp = [
+                    sp[0],sp[2],sp[9],sp[6],sp[8],
+                    bp[0],bp[2],bp[4],bp[6],bp[8],bp[10],bp[12],bp[14]
+                ];
+
+                hull() polyhedron(
+                    points = [
+                        wp[1],wp[2],wp[9],wp[10],wp[3],wp[4],wp[11],wp[12]
+                    ],
+                    faces = [
+                        [0,1,2,3],[4,5,6,7]
+                    ]
+                );
+
+                hull() polyhedron(
+                    points = [
+                        wp[1],wp[2],wp[9],wp[10],
+                        wp[7],wp[8],wp[10],wp[9],
+                        wp[5],wp[6],wp[8],wp[7],
+                        wp[5],wp[6],wp[2],wp[1],wp[0]
+                    ],
+                    faces = [
+                        [0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15,16]
+                    ]
+                );
+
+                *plotPoints(wp);
+            }
+
+
         }
     }
 
@@ -121,7 +222,7 @@ module colTopBezel(col,adjCol,debug=false) {
 module colTopEdge(col,adjCol,debug=false) {
     bzPoints = topBezelPoints(col);
     bzEdgePoints = [ bzPoints[4],bzPoints[5],bzPoints[6],bzPoints[7] ];
-    edgeFrontPoints = offsetPoints( bzEdgePoints, [case_back_taper[0], 0, -case_back_taper[1]] );
+    edgeFrontPoints = offsetPoints( bzEdgePoints, [dish_edge_taper[0], 0, -dish_edge_taper[1]] );
     edgePoints = concat_mx([
         bzEdgePoints,edgeFrontPoints
     ]);
@@ -139,7 +240,7 @@ module colTopEdge(col,adjCol,debug=false) {
     if(len(adjCol) > 0) {
         adjBzPoints = topBezelPoints(adjCol);
         adjBzEdgePoints = [ adjBzPoints[4],adjBzPoints[5],adjBzPoints[6],adjBzPoints[7] ];
-        adjEdgeFrontPoints = offsetPoints( adjBzEdgePoints, [case_back_taper[0], 0, -case_back_taper[1]] );
+        adjEdgeFrontPoints = offsetPoints( adjBzEdgePoints, [dish_edge_taper[0], 0, -dish_edge_taper[1]] );
         adjEdgePoints = concat_mx([adjBzEdgePoints,adjEdgeFrontPoints]);
         *plotPoints(adjEdgePoints,clr="blue",offsets=[0,0,1]);
         *plotPoints(edgePoints,clr="yellow",offsets=[0,0,2]);
@@ -170,7 +271,7 @@ module colBackWall(col,adjCol,caseBottom,debug=false) {
     // Work out the edge points
     bzPoints = topBezelPoints(col);
     bzEdgePoints = [ bzPoints[4],bzPoints[5],bzPoints[6],bzPoints[7] ];
-    edgeFrontPoints = offsetPoints( bzEdgePoints, [case_back_taper[0], 0, -case_back_taper[1]] );
+    edgeFrontPoints = offsetPoints( bzEdgePoints, [dish_edge_taper[0], 0, -dish_edge_taper[1]] );
     edgePoints = concat_mx([
         bzEdgePoints,edgeFrontPoints
     ]);
@@ -198,7 +299,7 @@ module colBackWall(col,adjCol,caseBottom,debug=false) {
         // Work out the adjacent edge points
         adjBzPoints = topBezelPoints(adjCol);
         adjBzEdgePoints = [ adjBzPoints[4],adjBzPoints[5],adjBzPoints[6],adjBzPoints[7] ];
-        adjEdgeFrontPoints = offsetPoints( adjBzEdgePoints, [case_back_taper[0], 0, -case_back_taper[1]] );
+        adjEdgeFrontPoints = offsetPoints( adjBzEdgePoints, [dish_edge_taper[0], 0, -dish_edge_taper[1]] );
         adjEdgePoints = concat_mx([
             adjBzEdgePoints,adjEdgeFrontPoints
         ]);
@@ -246,6 +347,14 @@ module colBackWall(col,adjCol,caseBottom,debug=false) {
 function offsetPoints(points,ofst) = [
     for(p=points)
         [p.x + ofst.x, p.y + ofst.y, p.z + ofst.z]
+];
+function fixPoints(points,fixed) = [
+    for(p=points)
+        [
+            fixed.x != "" ? fixed.x : p.x,
+            fixed.y != "" ? fixed.y : p.y,
+            fixed.z != "" ? fixed.z : p.z
+        ]
 ];
 
 function topBezelPoints(col) = _topBezelPoints(getSwitchFacePoints(getColSwitches(col)[0], P_FCE_FRONT));
