@@ -16,6 +16,7 @@ include <../common.scad>
 // And sum of distances between centers of 11 keys should be 190mm +/-0.05mm, not 190.5mm.
 
 mx_switch_full_height = 19.2; // Measured from base to top of keycap (excluding the pins) - calibrated to a DSA row 3 keycap.
+mx_switch_min_clearance = 4; // The minimum amount of clearance below the switches in the case to allow for room for the electronics.
 
 // // Amoeba Mount
 // Distance between center of screws

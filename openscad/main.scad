@@ -53,27 +53,31 @@ module main() {
 
 // Render the given half of the keyboard
 module keyboardHalf(handSpec,colWidth,debug=false) {
-    // // Work some math about the shape of the end result
-    //cv = switch_col_args(h,home_row);
-    // allPoints = allDishPoints(cv);
-    // bp = boundingPair(allPoints);
-    // color("red") for(p=bp) translate(p) sphere(1);
-
-    // Render!!
-    // for(ci=[0:len(cv)-1]) {
-    //     switch_col_arc(cv[ci], ci < len(cv)-1 ? cv[ci+1] : [], debug);
-    // }
-
     // Flip the right hand fingers
     hs = getHandSide(handSpec) == P_HAND_LEFT ? handSpec : reverseHand(handSpec);
 
+    // Work out the dish spec
     dishSpec = newDishSpec(handSpec, colWidth, fingerMargin, mx_socket_perim_H, home_row);
+    
+    // Work out the deepest point for calculating the bottom of the case
+    allRads = getAllRadiuses(dishSpec);
+    dp = deepestPoint(allRads);
+    caseBottom = (dp + mx_switch_min_clearance + case_bottom_plate_thickness) * -1;
+    
+    // Render the half
     columns = getDishSpecColumns(dishSpec);
     colCount = len(columns);
     for(ci=[0:colCount-1]) {
-        curvedSwitchColumn(columns[ci], (ci < colCount - 1 ? columns[ci+1] : []), ci, debug);
+        curvedSwitchColumn(columns[ci], (ci < colCount - 1 ? columns[ci+1] : []), ci, caseBottom, debug);
     }
 }
+
+function getAllRadiuses(dishSpec) = [
+    for(c=getDishSpecColumns(dishSpec))
+        getPlateUnderRadius(getColSpecRadiuses(c))
+];
+function deepestPoint(radiuses) = _deepestPoint(radiuses,len(radiuses));
+function _deepestPoint(radiuses,n,i=0) = i < n - 1 ? radiuses[i] > _deepestPoint(radiuses,n,i+1) ? radiuses[i] : _deepestPoint(radiuses,n,i+1) : radiuses[i];
 
 function genCols(colSpecs) = [
     for(c=colSpecs) newColumn(c)
@@ -125,11 +129,11 @@ function getColOffset(fingerSpec, colIndex, colWidth, fingerIndex, fingerMargin)
     [getFingerXOffset(fingerSpec), getColYOffset(colIndex, colWidth, fingerIndex, fingerMargin), 0];
 function getColYOffset(colIndex, colWidth, fingerIndex, fingerMargin) = ((colIndex * colWidth) + (fingerIndex * fingerMargin));
 
-// Get all points for the main switch area for the board
-function allDishPoints(v,i=0) = i < len(v) -1
-    ? concat_mx([all_finger_points(v[i]), allDishPoints(v,i+1)])
-    : all_finger_points(v[i]);
-function all_finger_points(m,i=0) = i < len(m) - 1 ? concat_mx([all_col_pts(m[0],m[1],m[2],m[3],m[4]), all_finger_points(m,i+1)]) : all_col_pts(m[0],m[1],m[2],m[3],m[4]);
+// // Get all points for the main switch area for the board
+// function allDishPoints(v,i=0) = i < len(v) -1
+//     ? concat_mx([all_finger_points(v[i]), allDishPoints(v,i+1)])
+//     : all_finger_points(v[i]);
+// function all_finger_points(m,i=0) = i < len(m) - 1 ? concat_mx([all_col_pts(m[0],m[1],m[2],m[3],m[4]), all_finger_points(m,i+1)]) : all_col_pts(m[0],m[1],m[2],m[3],m[4]);
 
 // Generate the arguments expected by the column arc methods, with the proper offsets
 function switch_col_args(h,o) = [

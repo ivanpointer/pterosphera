@@ -89,3 +89,11 @@ function outerQ(m,q,c=OUTER_HIGH,i=0) = i < len(m) - 1 ? _c(m[i],outerQ(m,q,c,i+
 function _c(crnt,chlng,q,c=OUTER_HIGH) = c == OUTER_HIGH
     ? (crnt[q] > chlng[q] ? crnt : chlng)
     : (crnt[q] < chlng[q] ? crnt : chlng);
+
+
+module plotPoints(points,clr="blue",offsets=[0,0,0]) {
+    color(clr) for(p=[0:len(points)-1]) translate([points[p].x + offsets.x, points[p].y + offsets.y, points[p].z + offsets.z]) {
+        text3d(str(p),0.2,1);
+        sphere(0.1);
+    }
+}

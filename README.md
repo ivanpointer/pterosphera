@@ -7,6 +7,12 @@ I'm pausing on my work on the Go strategy, and revisiting how I'm generating the
 
 ## Build Log
 
+### Fri Mar 4
+
+Hit a good milestone - am now generating a super plausible back side of the case.
+
+![Fri Mar 4 Progress](docs/build_log/2022-03-04_13-51-55.png)
+
 ### Sat Feb 26
 
 Taking a couple steps back to be able to take a bunch forward.  I'm pulling back to double-down on my strategy of building
