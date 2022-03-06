@@ -97,3 +97,10 @@ module plotPoints(points,clr="blue",offsets=[0,0,0]) {
         sphere(0.1);
     }
 }
+
+function circPointX(angle, angleOffset, radius, xOffset, edgeNo) =
+    (cos((angle * -edgeNo) - angleOffset) * radius) + xOffset;
+function circPointZ(angle, angleOffset, radius, zOffset, edgeNo) =
+    (sin((angle * -edgeNo) - angleOffset) * radius) + zOffset;
+function circPointY(angle, angleOffset, radius, yOffset, edgeNo) =
+    (sin((angle * -edgeNo) - angleOffset) * radius) + yOffset;

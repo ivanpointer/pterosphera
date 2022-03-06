@@ -491,8 +491,3 @@ function circPoint(angles, xOffset, y, zOffset, radius, edgeNo) = [
     y,
     circPointZ(getColAngle(angles), getColAngleOffset(angles), radius, zOffset, edgeNo)
 ];
-
-function circPointX(angle, angleOffset, radius, xOffset, edgeNo) =
-    (cos((angle * -edgeNo) - angleOffset) * radius) + xOffset;
-function circPointZ(angle, angleOffset, radius, zOffset, edgeNo) =
-    (sin((angle * -edgeNo) - angleOffset) * radius) + zOffset;

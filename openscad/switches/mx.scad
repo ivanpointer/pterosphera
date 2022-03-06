@@ -76,7 +76,7 @@ mx_clip_hole_D = 2.5;
 // _mx_socket_hole_y_ofst = mx_socket_clearance_min / 2;
 
 // Modules 
-module mx_socket(center = false) {
+module mx_socket(nocut = false, center = false) {
     center_if(f_am_screw_sheaths_W(), mx_socket_perim_WH, mx_socket_total_D, center)
         right((f_am_screw_sheaths_W() - mx_socket_perim_WH) / 2) {
         difference() {
@@ -84,10 +84,10 @@ module mx_socket(center = false) {
                 // Render the first bit of the socket
                 difference() {
                     // Render the main socket border
-                    dcolor("purple") cube([mx_socket_perim_WH, mx_socket_perim_WH, mx_socket_total_D]);
+                    dcolor("purple") mx_socket_base();
 
                     // Cut out the center hole
-                    dcolor("red") right((mx_socket_perim_WH - mx_hole_W()) / 2)
+                    if(!nocut) dcolor("red") right((mx_socket_perim_WH - mx_hole_W()) / 2)
                         back((mx_socket_perim_WH - mx_hole_H()) / 2)
                         down(weld_mgn)
                         mx_hole();
@@ -100,12 +100,16 @@ module mx_socket(center = false) {
             }
 
             // Cut out the amoeba screw holes
-            down(weld_mgn)
+            if(!nocut) down(weld_mgn)
                 back((mx_socket_perim_WH / 2) - am_screw_hole_top_R)
                 left( ((am_screw_dist + (am_screw_hole_top_R * 2)) - mx_socket_perim_WH) / 2 )
                     dcolor("red") am_holes();
         }
     }
+}
+
+module mx_socket_base(center=false) {
+    cube([mx_socket_perim_H, mx_socket_perim_W, mx_socket_total_D],center=center);
 }
 
 module mx_hole(center = false) {

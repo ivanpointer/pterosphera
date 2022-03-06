@@ -1,6 +1,7 @@
 include <switches/mx.scad>
 use <trackball/trackball_socket.scad>
 include <bodies/col_arc_3.scad>
+include <bodies/thumb_clusters.scad>
 include <BOSL2/std.scad>
 include <lib/utils.scad>
 
@@ -47,8 +48,16 @@ module main() {
     // Render the whole thing
     keyboardHalf(rightHand,mx_socket_perim_W,debug);
 
+    * trackball_socket();
+
     // Render just one finger (for dev)
     // keyboardHalf([hand_right[0]], debug);
+    /*
+        innerRadius,
+    innerOffset,
+    innerElevation,
+    outerElevation
+    */
 } main();
 
 // Render the given half of the keyboard
@@ -64,12 +73,30 @@ module keyboardHalf(handSpec,colWidth,debug=false) {
     dp = deepestPoint(allRads);
     caseBottom = (dp + mx_switch_min_clearance + case_bottom_plate_thickness) * -1;
     
-    // Render the half
-    columns = getDishSpecColumns(dishSpec);
-    colCount = len(columns);
-    for(ci=[0:colCount-1]) {
-        curvedSwitchColumn(columns[ci], (ci < colCount - 1 ? columns[ci+1] : []), ci, colCount, caseBottom, debug);
+    // Render the dish
+    colSpecs = getDishSpecColumns(dishSpec);
+    colCount = len(colSpecs);
+    #for(ci=[0:colCount-1]) {
+        curvedSwitchColumn(colSpecs[ci], (ci < colCount - 1 ? colSpecs[ci+1] : []), ci, colCount, caseBottom, debug);
     }
+
+    allCols = genCols(colSpecs);
+    echo(allCols);
+    for(c=allCols)
+        for(s=getColSwitches(c))
+            plotPoints(getSwitchPoints(s));
+
+    // Render the thumb cluster
+    thumbJointRadius = 73.8;
+    yOffset = ((colCount - 2) * mx_socket_perim_W) + ((len(getHandFingers(handSpec)) - 1) * fingerMargin);
+    #thumbCluster(
+        thumbJointRadius  // thumb joint radius
+        ,14.3 // thumb tip radius
+        ,5   // outer Z offset
+        ,15    // rotation of the thumb cluster
+        ,1.5  // min margin between the inner and outer rows
+        //,ofst = [-thumbJointRadius,yOffset,caseBottom]
+    );
 }
 
 function getAllRadiuses(dishSpec) = [
