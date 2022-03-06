@@ -46,7 +46,8 @@ fingerMargin = 1.5;
 // MAIN
 module main() { 
     // Render the whole thing
-    keyboardHalf(rightHand,mx_socket_perim_W,debug);
+    thumbClusterAlignCol = 4;
+    keyboardHalf(rightHand,mx_socket_perim_W,thumbClusterAlignCol,debug);
 
     * trackball_socket();
 
@@ -61,7 +62,7 @@ module main() {
 } main();
 
 // Render the given half of the keyboard
-module keyboardHalf(handSpec,colWidth,debug=false) {
+module keyboardHalf(handSpec,colWidth,thumbClusterAlignCol,debug=false) {
     // Flip the right hand fingers
     hs = getHandSide(handSpec) == P_HAND_LEFT ? handSpec : reverseHand(handSpec);
 
@@ -89,10 +90,10 @@ module keyboardHalf(handSpec,colWidth,debug=false) {
     // Render the dish
     colCount = len(colSpecs);
     for(ci=[0:colCount-1]) {
-        curvedSwitchColumn(colSpecs[ci], (ci < colCount - 1 ? colSpecs[ci+1] : []), ci, colCount, caseBottom, dishRot, debug);
+        frontWall = ci < thumbClusterAlignCol - 1;
+        curvedSwitchColumn(colSpecs[ci], (ci < colCount - 1 ? colSpecs[ci+1] : []), ci, colCount, caseBottom, dishRot, frontWall, debug);
     }
 
-    thumbClusterAlignCol = 4;
     tcac = allCols[thumbClusterAlignCol];
     tcacs = getColSwitches(tcac);
     tcas = tcacs[len(tcacs)-1];
