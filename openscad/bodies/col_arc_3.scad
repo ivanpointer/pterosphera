@@ -210,7 +210,7 @@ module colTopBezel(col,adjCol,debug=false) {
         bzWeldPoints = [
             bzPoints[1],bzPoints[3],bzPoints[5],bzPoints[7],
             adjBzPoints[0],adjBzPoints[2],adjBzPoints[4],adjBzPoints[6],
-            [bzPoints[3].x, adjBzPoints[2].y, bzPoints[3].z],
+            [bzPoints[3].x, bzPoints[3].y + fingerMargin, bzPoints[3].z],
             [adjBzPoints[2].x, adjBzPoints[2].y - fingerMargin, adjBzPoints[2].z],
             [adjBzPoints[6].x, adjBzPoints[6].y - fingerMargin, adjBzPoints[6].z],
         ];
