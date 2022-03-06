@@ -12,32 +12,38 @@ module thumbCluster(
     thumbTipRadius,
     outerZOffset,
     clusterRot,
+    clusterAnchor,
     rowMarginMin,
     ofst = [0,0,0],
     colCount = 3
 ) {
-    tr = thumbJointRadius - (mx_socket_perim_H / 2);
+    tr = thumbJointRadius; // - (mx_socket_perim_H / 2);
+    trt = tr + mx_socket_perim_H;
     otr = thumbTipRadius < mx_socket_perim_H ? mx_socket_perim_H : thumbTipRadius;
     currentMgn = otr - mx_socket_perim_H;
     mgn = rowMarginMin > currentMgn ? rowMarginMin : currentMgn;
     or = tr + otr + mgn;
+    ort = or + mx_socket_perim_H;
     jointAngle = asin(mx_socket_perim_H / tr) * -1;
-    angleOffset = jointAngle / -2;
+    angleOffset = 0; //jointAngle / -2;
     zOffset = mx_socket_total_D + ofst.z;
+    xOffset = -ort + ofst.x + clusterAnchor.x;
+
+    rotAnchor = [ circPointX(jointAngle, angleOffset, tr, 0, 0) + xOffset, circPointY(jointAngle, angleOffset, tr, 0, 0) + ofst.y, zOffset ];
 
     clrs = ["red","blue","green","purple","cyan"];
 
     for(ci=[0:colCount-1]) {
         color(clrs[ci%len(clrs)]) {
             switchTopPts = [
-                [ circPointX(jointAngle, angleOffset, tr, 0, ci) + ofst.x, circPointY(jointAngle, angleOffset, tr, 0, ci) + ofst.y, zOffset ]
-                ,[ circPointX(jointAngle, angleOffset, tr, 0, ci+1) + ofst.x, circPointY(jointAngle, angleOffset, tr, 0, ci+1) + ofst.y, zOffset ]
-                ,[ circPointX(jointAngle, angleOffset, tr + mx_socket_perim_H, 0, ci) + ofst.x, circPointY(jointAngle, angleOffset, tr + mx_socket_perim_H, 0, ci) + ofst.y, zOffset ]
-                ,[ circPointX(jointAngle, angleOffset, tr + mx_socket_perim_H, 0, ci+1) + ofst.x, circPointY(jointAngle, angleOffset, tr + mx_socket_perim_H, 0, ci+1) + ofst.y, zOffset ]
-                ,[ circPointX(jointAngle, angleOffset, or, 0, ci) + ofst.x, circPointY(jointAngle, angleOffset, or, 0, ci) + ofst.y, outerZOffset + zOffset ]
-                ,[ circPointX(jointAngle, angleOffset, or, 0, ci+1) + ofst.x, circPointY(jointAngle, angleOffset, or, 0, ci+1) + ofst.y, outerZOffset + zOffset ]
-                ,[ circPointX(jointAngle, angleOffset, or + mx_socket_perim_H, 0, ci) + ofst.x, circPointY(jointAngle, angleOffset, or + mx_socket_perim_H, 0, ci) + ofst.y, outerZOffset + zOffset ]
-                ,[ circPointX(jointAngle, angleOffset, or + mx_socket_perim_H, 0, ci+1) + ofst.x, circPointY(jointAngle, angleOffset, or + mx_socket_perim_H, 0, ci+1) + ofst.y, outerZOffset + zOffset ]
+                [ circPointX(jointAngle, angleOffset, tr, 0, ci) + xOffset, circPointY(jointAngle, angleOffset, tr, 0, ci) + ofst.y, zOffset ]
+                ,[ circPointX(jointAngle, angleOffset, tr, 0, ci+1) + xOffset, circPointY(jointAngle, angleOffset, tr, 0, ci+1) + ofst.y, zOffset ]
+                ,[ circPointX(jointAngle, angleOffset, trt, 0, ci) + xOffset, circPointY(jointAngle, angleOffset, trt, 0, ci) + ofst.y, zOffset ]
+                ,[ circPointX(jointAngle, angleOffset, trt, 0, ci+1) + xOffset, circPointY(jointAngle, angleOffset, trt, 0, ci+1) + ofst.y, zOffset ]
+                ,[ circPointX(jointAngle, angleOffset, or, 0, ci) + xOffset, circPointY(jointAngle, angleOffset, or, 0, ci) + ofst.y, outerZOffset + zOffset ]
+                ,[ circPointX(jointAngle, angleOffset, or, 0, ci+1) + xOffset, circPointY(jointAngle, angleOffset, or, 0, ci+1) + ofst.y, outerZOffset + zOffset ]
+                ,[ circPointX(jointAngle, angleOffset, ort, 0, ci) + xOffset, circPointY(jointAngle, angleOffset, ort, 0, ci) + ofst.y, outerZOffset + zOffset ]
+                ,[ circPointX(jointAngle, angleOffset, ort, 0, ci+1) + xOffset, circPointY(jointAngle, angleOffset, ort, 0, ci+1) + ofst.y, outerZOffset + zOffset ]
             ];
 
             fsp = concat_mx([
@@ -55,7 +61,8 @@ function circPointY(angle, angleOffset, radius, yOffset, edgeNo) =
     (sin((angle * -edgeNo) - angleOffset) * radius) + yOffset;
             */
 
-            sp = xrot(-clusterRot, fsp);
+            sp = xrot(-clusterRot, fsp, cp = rotAnchor);
+            //plotPoints(fsp);
             // sp = fsp;
             // echo(clusterRot, sp);
 

@@ -12,7 +12,7 @@ I'm pausing on my work on the Go strategy, and revisiting how I'm generating the
 Got started on the thumb cluster without the trackball.  Working on getting it positioned right, and the walls generated
 in around it, and welding it to the main body of the case.
 
-![Sat Mar 5 Progress](docs/build_log/2022-03-05_18-58-16.png)
+![Sat Mar 5 Progress](docs/build_log/2022-03-05_20-57-27.png)
 
 ### Fri Mar 4
 

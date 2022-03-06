@@ -76,26 +76,42 @@ module keyboardHalf(handSpec,colWidth,debug=false) {
     // Render the dish
     colSpecs = getDishSpecColumns(dishSpec);
     colCount = len(colSpecs);
-    #for(ci=[0:colCount-1]) {
+    for(ci=[0:colCount-1]) {
         curvedSwitchColumn(colSpecs[ci], (ci < colCount - 1 ? colSpecs[ci+1] : []), ci, colCount, caseBottom, debug);
     }
 
     allCols = genCols(colSpecs);
-    echo(allCols);
-    for(c=allCols)
+    //echo(allCols);
+    *for(c=allCols)
         for(s=getColSwitches(c))
             plotPoints(getSwitchPoints(s));
 
+    thumbClusterAlignCol = 4;
+    tcac = allCols[thumbClusterAlignCol];
+    tcacs = getColSwitches(tcac);
+    tcas = tcacs[len(tcacs)-1];
+    tcasp = getSwitchPoints(tcas);
+    thumbClusterAnchor = tcasp[6];
+    thumbClusterZOffset = 7 + mx_switch_min_clearance;
+
+    *plotPoints(tcasp);
+
     // Render the thumb cluster
     thumbJointRadius = 73.8;
+    thumbTipRadius = 14.3;
     yOffset = ((colCount - 2) * mx_socket_perim_W) + ((len(getHandFingers(handSpec)) - 1) * fingerMargin);
     #thumbCluster(
         thumbJointRadius  // thumb joint radius
-        ,14.3 // thumb tip radius
+        ,thumbTipRadius // thumb tip radius
         ,5   // outer Z offset
-        ,15    // rotation of the thumb cluster
+        ,25    // rotation of the thumb cluster
+        ,thumbClusterAnchor // the anchor for the thumb cluster rotation
         ,1.5  // min margin between the inner and outer rows
-        //,ofst = [-thumbJointRadius,yOffset,caseBottom]
+        ,ofst = [ //thumbClusterAnchor // [-thumbJointRadius,yOffset,caseBottom]
+            0,
+            thumbClusterAnchor.y,
+            thumbClusterAnchor.z + thumbClusterZOffset
+        ]
     );
 }
 
