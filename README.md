@@ -12,6 +12,8 @@ I'm pausing on my work on the Go strategy, and revisiting how I'm generating the
 Got started on the thumb cluster without the trackball.  Working on getting it positioned right, and the walls generated
 in around it, and welding it to the main body of the case.
 
+I've managed to work in tenting of the body and to get a lot of the edge generation working, but there's still an artifact or two to work out.  This includes calculating the ideal height of the case based on the lowest point in the dish.
+
 ![Sat Mar 5 Progress](docs/build_log/2022-03-05_20-57-27.png)
 
 ### Fri Mar 4

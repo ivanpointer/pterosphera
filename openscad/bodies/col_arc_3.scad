@@ -16,15 +16,15 @@ switchColors = ["red","blue","green","purple", "cyan", "white"];
 
 // Render a single arced column of switches (sockets)
 // Note: home row is counted from 0, so a value of 2 means that there would be two switches above the switch that is designated as "home row".
-module curvedSwitchColumn(colSpec,adjacentColSpec,colNo,colCount,caseBottom,debug = false) {
+module curvedSwitchColumn(colSpec,adjacentColSpec,colNo,colCount,caseBottom,dishRot,debug = false) {
     // Define the column
-    col = newColumn(colSpec);
+    col = newColumn(colSpec,dishRot);
     switches = getColSwitches(col);
     swLen = len(switches);
 
     // Work out the next column, if we need to weld them together
     toWeld = getColSpecFingerPos(colSpec)[1] == 1 && len(adjacentColSpec) > 0;
-    adjCol = toWeld ? newColumn(adjacentColSpec) : [];
+    adjCol = toWeld ? newColumn(adjacentColSpec,dishRot) : [];
     adjSwitches = toWeld ? getColSwitches(adjCol) : [];
     adjLen = len(adjSwitches);
     weldLen = toWeld ? swLen > adjLen ? swLen - 1 : adjLen - 1 : swLen;
@@ -74,8 +74,7 @@ module caseEdge(col,si,caseBottom,ornt) {
     clr=switchColors[si%len(switchColors)];
     switches = getColSwitches(col);
     switch = switches[si];
-    fp = getSwitchFacePoints(switch,P_FCE_LEFT);
-    facePts = ornt == 1 ? fp : offsetPoints(fp,[0,mx_socket_perim_W,0]);
+    facePts = ornt == 1 ? getSwitchFacePoints(switch,P_FCE_LEFT) : getSwitchFacePoints(switch,P_FCE_RIGHT);
     bzPts = concat_mx([
         facePts,
         offsetPoints([facePts[0],facePts[1]], [0,(-dish_edge_taper[0]+case_wall_thickness)*ornt, -dish_edge_taper[1]]),
@@ -119,8 +118,7 @@ module caseEdge(col,si,caseBottom,ornt) {
     // Weld the corner
     if(si == 0) {
         // Work out the edge points
-        bzp = topBezelPoints(col);
-        bzPoints = ornt == 1 ? bzp : offsetPoints(bzp,[0,mx_socket_perim_W,0]);
+        bzPoints = topBezelPoints(col);
         bzEdgePoints = [ bzPoints[4],bzPoints[5],bzPoints[6],bzPoints[7] ];
         edgeFrontPoints = offsetPoints( bzEdgePoints, [dish_edge_taper[0], 0, -dish_edge_taper[1]] );
         edgePoints = concat_mx([
@@ -142,9 +140,12 @@ module caseEdge(col,si,caseBottom,ornt) {
         ]);
         sp = wallPoints;
 
-        wp = [
+        wp = ornt == 1 ? [
             sp[0],sp[2],sp[9],sp[6],sp[8],
             bp[0],bp[2],bp[4],bp[6],bp[8],bp[10],bp[12],bp[14]
+        ] : [
+            sp[0],sp[2],sp[9],sp[6],sp[8],
+            bp[1],bp[3],bp[5],bp[7],bp[9],bp[11],bp[13],bp[15]
         ];
 
         hull() polyhedron(
@@ -423,10 +424,10 @@ function getColSpecSwitchCount(colSpec) = colSpec[8];
 function getColSpecSwitchHeight(colSpec) = colSpec[9];
 function getColSpecHomeRow(colSpec) = colSpec[10];
 
-function newColumn(colSpec) = [
+function newColumn(colSpec,dishRot) = [
     // Build the switches for the column
     colSpec,
-    newColumnSwitches(colSpec)
+    newColumnSwitches(colSpec,dishRot)
 ];
 function getColSpec(col) = col[0];
 function getColSwitches(col) = col[1];
@@ -447,17 +448,17 @@ function newColAngles(switchRadiuses, switchHeight, homeRow) = [
 function getColAngle(colAngles) = colAngles[0];
 function getColAngleOffset(colAngles) = colAngles[1];
 
-function newColumnSwitches(colSpec) = [
+function newColumnSwitches(colSpec,dishRot) = [
     for(i=[0:getColSpecSwitchCount(colSpec)-1])
-        newColumnSwitch(colSpec, i)
+        newColumnSwitch(colSpec, i, dishRot)
 ];
 
-function newColumnSwitch(colSpec, switchNo) = [
+function newColumnSwitch(colSpec, switchNo, dishRot) = [
     colSpec,
     switchNo,
     [ switchNo == 0 ? 1 : 0, switchNo == getColSpecSwitchCount(colSpec) - 1 ? 1 : 0 ], // Switch is first/is last
 
-    newSwitchPoints(getColSpecAngles(colSpec), getColSpecColOffset(colSpec), getColSpecColWidth(colSpec), getColSpecRadiuses(colSpec), switchNo),
+    xrot(dishRot, (newSwitchPoints(getColSpecAngles(colSpec), getColSpecColOffset(colSpec), getColSpecColWidth(colSpec), getColSpecRadiuses(colSpec), switchNo))),
     [ // faces
         [0,2,4,6], // left
         [1,3,5,7], // right

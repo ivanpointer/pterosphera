@@ -69,22 +69,28 @@ module keyboardHalf(handSpec,colWidth,debug=false) {
     dishSpec = newDishSpec(hs, colWidth, fingerMargin, mx_socket_perim_H, home_row);
     
     // Work out the deepest point for calculating the bottom of the case
-    allRads = getAllRadiuses(dishSpec);
-    dp = deepestPoint(allRads);
-    caseBottom = (dp + mx_switch_min_clearance + case_bottom_plate_thickness) * -1;
-    
-    // Render the dish
+    dishRot = 10;
     colSpecs = getDishSpecColumns(dishSpec);
+    allCols = genCols(colSpecs,dishRot);
+    allPoints = concat_mx([
+        for(c=allCols)
+            for(s=getColSwitches(c))
+                getSwitchPoints(s)
+    ]);
+    *plotPoints(allPoints);
+    //dp = deepestPoint(allPoints);
+    bp = boundingPair(allPoints);
+    //echo(bp);
+    dp = bp[0];
+    //echo(dp);
+    caseBottom = (-dp.z + mx_switch_min_clearance + case_bottom_plate_thickness) * -1;
+    //caseBottom = 0;
+
+    // Render the dish
     colCount = len(colSpecs);
     for(ci=[0:colCount-1]) {
-        curvedSwitchColumn(colSpecs[ci], (ci < colCount - 1 ? colSpecs[ci+1] : []), ci, colCount, caseBottom, debug);
+        curvedSwitchColumn(colSpecs[ci], (ci < colCount - 1 ? colSpecs[ci+1] : []), ci, colCount, caseBottom, dishRot, debug);
     }
-
-    allCols = genCols(colSpecs);
-    //echo(allCols);
-    *for(c=allCols)
-        for(s=getColSwitches(c))
-            plotPoints(getSwitchPoints(s));
 
     thumbClusterAlignCol = 4;
     tcac = allCols[thumbClusterAlignCol];
@@ -104,7 +110,7 @@ module keyboardHalf(handSpec,colWidth,debug=false) {
         thumbJointRadius  // thumb joint radius
         ,thumbTipRadius // thumb tip radius
         ,5   // outer Z offset
-        ,25    // rotation of the thumb cluster
+        ,30    // rotation of the thumb cluster
         ,thumbClusterAnchor // the anchor for the thumb cluster rotation
         ,1.5  // min margin between the inner and outer rows
         ,ofst = [ //thumbClusterAnchor // [-thumbJointRadius,yOffset,caseBottom]
@@ -119,11 +125,14 @@ function getAllRadiuses(dishSpec) = [
     for(c=getDishSpecColumns(dishSpec))
         getPlateUnderRadius(getColSpecRadiuses(c))
 ];
-function deepestPoint(radiuses) = _deepestPoint(radiuses,len(radiuses));
-function _deepestPoint(radiuses,n,i=0) = i < n - 1 ? radiuses[i] > _deepestPoint(radiuses,n,i+1) ? radiuses[i] : _deepestPoint(radiuses,n,i+1) : radiuses[i];
+function deepestRadius(radiuses) = _deepestRadius(radiuses,len(radiuses));
+function _deepestRadius(radiuses,n,i=0) = i < n - 1 ? radiuses[i] > _deepestRadius(radiuses,n,i+1) ? radiuses[i] : _deepestRadius(radiuses,n,i+1) : radiuses[i];
 
-function genCols(colSpecs) = [
-    for(c=colSpecs) newColumn(c)
+function deepestPoint(pts) = _deepestPoint(pts,len(pts));
+function _deepestPoint(pts,n,i=0) = i < n - 1 ? pts[i][2] < (_deepestPoint(pts,n,i+1))[2] ? pts[i] : _deepestPoint(pts,n,i+1) : pts[i];
+
+function genCols(colSpecs,dishRot) = [
+    for(c=colSpecs) newColumn(c,dishRot)
 ];
 
 function reverseHand(handSpec) = [
