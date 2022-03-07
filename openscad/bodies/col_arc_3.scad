@@ -37,7 +37,7 @@ module curvedSwitchColumn(colSpec,adjacentColSpec,colNo,colCount,caseBottom,dish
         // Render the switch
         if(si < swLen) {
             switch = switches[si];
-            # color(clr)
+            color(clr)
                 hull()
                 polyhedron(
                     points = concat_mx([getSwitchFacePoints(switch,P_FCE_FRONT), getSwitchFacePoints(switch,P_FCE_BACK)]),
@@ -83,7 +83,7 @@ module caseEdge(col,si,caseBottom,ornt,frontWall) {
         offsetPoints([facePts[0],facePts[1]], [0,(-dish_edge_taper[0]+case_wall_thickness)*ornt, -dish_edge_taper[1]]),
         offsetPoints([facePts[2],facePts[3]], [0,-dish_edge_taper[0]*ornt, -dish_edge_taper[1]])
     ]);
-    #color(clr) hull() polyhedron(
+    color(clr) hull() polyhedron(
         points = bzPts,
         faces = [
             [0,1,2,3],[4,5,6,7]
@@ -108,7 +108,7 @@ module caseEdge(col,si,caseBottom,ornt,frontWall) {
         [inWallPoints[2].x, inWallPoints[0].y, inWallPoints[2].z]
     ];
     
-    # color(clr) hull() polyhedron(
+    color(clr) hull() polyhedron(
         points = wallPoints,
         faces = [
             [0,1,3,2],[4,5,7,6],[2,6,8,9]

@@ -7,6 +7,14 @@ I'm pausing on my work on the Go strategy, and revisiting how I'm generating the
 
 ## Build Log
 
+### Mon Mar 7
+
+I continue to build out the case around the thumb cluster.  Adding in bezels will make welding this together a bit easier.
+
+For those of you who stumble across this and have the (mis)fortune of having to dig into the inner-workings of this, I've added a mechanism for plotting various points.  The main body of the case is built largely with a strategy around `hull()` and `polyhedron` - as the math around these points make things a lot easier.  The module `plotPoints` allows you to plot a matrix of vertices - it renders a small sphere at the point, and a small number indicating the index.  This makes working out your polyhedrons quite a bit easier...
+
+![Mon Mar 7 Progress](docs/build_log/2022-03-07_13-56-21.png)
+
 ### Sat Mar 5
 
 Got started on the thumb cluster without the trackball.  Working on getting it positioned right, and the walls generated

@@ -107,7 +107,7 @@ module keyboardHalf(handSpec,colWidth,thumbClusterAlignCol,debug=false) {
     thumbJointRadius = 73.8;
     thumbTipRadius = 14.3;
     yOffset = ((colCount - 2) * mx_socket_perim_W) + ((len(getHandFingers(handSpec)) - 1) * fingerMargin);
-    #thumbCluster(
+    thumbCluster(
         thumbJointRadius  // thumb joint radius
         ,thumbTipRadius // thumb tip radius
         ,5   // outer Z offset
