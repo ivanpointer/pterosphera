@@ -42,6 +42,8 @@ function getFingerSwitchCount(fingerSpec) = fingerSpec[3];
 function getFingerName(fingerSpec) = fingerSpec[4];
 
 fingerMargin = 1.5;
+dishRot = 17; // The tilt of the dish in degrees (tenting).
+thumbRot = 33; // The tilt of the thumb cluster in degrees (counter to the dish tenting);
 
 // MAIN
 module main() { 
@@ -50,15 +52,6 @@ module main() {
     keyboardHalf(rightHand,mx_socket_perim_W,thumbClusterAlignCol,debug);
 
     * trackball_socket();
-
-    // Render just one finger (for dev)
-    // keyboardHalf([hand_right[0]], debug);
-    /*
-        innerRadius,
-    innerOffset,
-    innerElevation,
-    outerElevation
-    */
 } main();
 
 // Render the given half of the keyboard
@@ -70,7 +63,6 @@ module keyboardHalf(handSpec,colWidth,thumbClusterAlignCol,debug=false) {
     dishSpec = newDishSpec(hs, colWidth, fingerMargin, mx_socket_perim_H, home_row);
     
     // Work out the deepest point for calculating the bottom of the case
-    dishRot = 10;
     colSpecs = getDishSpecColumns(dishSpec);
     allCols = genCols(colSpecs,dishRot);
     allPoints = concat_mx([
@@ -79,13 +71,9 @@ module keyboardHalf(handSpec,colWidth,thumbClusterAlignCol,debug=false) {
                 getSwitchPoints(s)
     ]);
     *plotPoints(allPoints);
-    //dp = deepestPoint(allPoints);
     bp = boundingPair(allPoints);
-    //echo(bp);
     dp = bp[0];
-    //echo(dp);
     caseBottom = (-dp.z + mx_switch_min_clearance + case_bottom_plate_thickness) * -1;
-    //caseBottom = 0;
 
     // Render the dish
     colCount = len(colSpecs);
@@ -99,7 +87,7 @@ module keyboardHalf(handSpec,colWidth,thumbClusterAlignCol,debug=false) {
     tcas = tcacs[len(tcacs)-1];
     tcasp = getSwitchPoints(tcas);
     thumbClusterAnchor = tcasp[6];
-    thumbClusterZOffset = 7 + mx_switch_min_clearance;
+    thumbClusterZOffset = mx_switch_min_clearance + 8;
 
     *plotPoints(tcasp);
 
@@ -111,7 +99,7 @@ module keyboardHalf(handSpec,colWidth,thumbClusterAlignCol,debug=false) {
         thumbJointRadius  // thumb joint radius
         ,thumbTipRadius // thumb tip radius
         ,5   // outer Z offset
-        ,30    // rotation of the thumb cluster
+        ,thumbRot    // rotation of the thumb cluster
         ,thumbClusterAnchor // the anchor for the thumb cluster rotation
         ,1.5  // min margin between the inner and outer rows
         ,ofst = [ //thumbClusterAnchor // [-thumbJointRadius,yOffset,caseBottom]
