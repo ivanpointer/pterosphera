@@ -51,7 +51,7 @@ module main() {
     thumbClusterAlignCol = 4;
     keyboardHalf(rightHand,mx_socket_perim_W,thumbClusterAlignCol,debug);
 
-    * trackball_socket();
+    //trackball_socket();
 } main();
 
 // Render the given half of the keyboard
@@ -94,7 +94,6 @@ module keyboardHalf(handSpec,colWidth,thumbClusterAlignCol,debug=false) {
     // Render the thumb cluster
     thumbJointRadius = 73.8;
     thumbTipRadius = 14.3;
-    yOffset = ((colCount - 2) * mx_socket_perim_W) + ((len(getHandFingers(handSpec)) - 1) * fingerMargin);
     thumbCluster(
         thumbJointRadius  // thumb joint radius
         ,thumbTipRadius // thumb tip radius
@@ -102,9 +101,10 @@ module keyboardHalf(handSpec,colWidth,thumbClusterAlignCol,debug=false) {
         ,thumbRot    // rotation of the thumb cluster
         ,thumbClusterAnchor // the anchor for the thumb cluster rotation
         ,1.5  // min margin between the inner and outer rows
+        ,caseBottom // the bottom of the case
         ,ofst = [ //thumbClusterAnchor // [-thumbJointRadius,yOffset,caseBottom]
             0,
-            thumbClusterAnchor.y,
+            thumbClusterAnchor.y + case_bezel,
             thumbClusterAnchor.z + thumbClusterZOffset
         ]
     );

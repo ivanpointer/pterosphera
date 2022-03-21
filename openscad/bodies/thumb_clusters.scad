@@ -9,6 +9,7 @@ module thumbCluster(
     clusterRot,
     clusterAnchor,
     rowMarginMin,
+    caseBottom,
     ofst = [0,0,0],
     colCount = 3
 ) {
@@ -151,6 +152,21 @@ module thumbCluster(
                 ]
             );
 
+            // Front bezel to ground
+            fwp = concat_mx([
+                [fbp[1],fbp[2],fbp[5],fbp[7]],
+                fixPoints([fbp[1],fbp[2],fbp[5],fbp[7]],["","",caseBottom])
+            ]);
+
+            hull() polyhedron( // Front Bezel
+                points = fwp,
+                faces = [
+                    [0,1,2,3],[4,5,6,7]
+                ]
+            );
+
+            *plotPoints(fwp);
+
             //- Back Bezel
             bbpr = ci == 0
                 ? [bp[3],bp[19]] : [bp[11],bp[27]];
@@ -198,33 +214,93 @@ module thumbCluster(
 
             // Left bezel if this is the last column of switches
             if(ci == colCount - 1) {
+                llbp = [
+                    bp[5],bp[4],bp[20],bp[21]
+                    ,sp[3],sp[1],sp[9],sp[11]
+                ];
                 hull() polyhedron( 
-                    points = [
-                        bp[5],bp[4],bp[20],bp[21]
-                        ,sp[3],sp[1],sp[9],sp[11]
-                    ],
+                    points = llbp,
                     faces = [
                         [0,1,2,3],[4,5,6,7]
                     ]
                 );
+
+                llbwp = concat_mx([
+                    [llbp[2],llbp[3],llbp[6],llbp[7]],
+                    fixPoints([llbp[2],llbp[3],llbp[6],llbp[7]], ["","",caseBottom])
+                ]);
+                hull() polyhedron( 
+                    points = llbwp,
+                    faces = [
+                        [0,1,2,3],[4,5,6,7]
+                    ]
+                );
+
+                lwbp = [
+                    bp[5],bp[6],bp[22],bp[21]
+                    ,sp[3],sp[5],sp[13],sp[11]
+                ];
+
                 hull() polyhedron(
-                    points = [
-                        bp[5],bp[6],bp[22],bp[21]
-                        ,sp[3],sp[5],sp[13],sp[11]
-                    ],
+                    points = lwbp,
                     faces = [
                         [0,1,2,3],[4,5,6,7]
                     ]
                 );
+
+                lwbwp = concat_mx([
+                    [lwbp[0],lwbp[3],lwbp[6],lwbp[7]],
+                    fixPoints([lwbp[0],lwbp[3],lwbp[6],lwbp[7]], ["","",caseBottom])
+                ]);
+
                 hull() polyhedron(
-                    points = [
-                        bp[6],bp[7],bp[23],bp[22]
-                        ,sp[5],sp[7],sp[15],sp[13]
-                    ],
+                    points = lwbwp,
                     faces = [
                         [0,1,2,3],[4,5,6,7]
                     ]
                 );
+
+                lubp = [
+                    bp[6],bp[7],bp[23],bp[22]
+                    ,sp[5],sp[7],sp[15],sp[13]
+                ];
+
+                hull() polyhedron(
+                    points = lubp,
+                    faces = [
+                        [0,1,2,3],[4,5,6,7]
+                    ]
+                );
+
+                
+                lubwp = concat_mx([
+                    [lubp[2],lubp[3],lubp[6],lubp[7]],
+                    fixPoints([lubp[2],lubp[3],lubp[6],lubp[7]], ["","",caseBottom])
+                ]);
+
+                hull() polyhedron(
+                    points = lubwp,
+                    faces = [
+                        [0,1,2,3],[4,5,6,7]
+                    ]
+                );
+
+                lwwp = [
+                    lwbwp[0],lwbwp[2],lwbwp[4],lwbwp[6],
+                    lubwp[1],lubwp[3],lubwp[5],lubwp[7]
+                ];
+
+                hull() polyhedron(
+                    points = lwwp,
+                    faces = [
+                        [0,1,2,3],[4,5,6,7]
+                    ]
+                );
+                
+                *plotPoints(lwwp);
+                *plotPoints(lwbwp,clr="red"); // 0,2,4,6
+                *plotPoints(lubwp,clr="blue"); // 1,3,5,7
+
             }
         }
 

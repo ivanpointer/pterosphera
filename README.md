@@ -7,6 +7,14 @@ I'm pausing on my work on the Go strategy, and revisiting how I'm generating the
 
 ## Build Log
 
+### Mon Mar 21
+
+Work has been busy, and the kids on break, so I've not had much time to look at this.
+
+I did manage to get some simple walls built for the basic thumb cluster.  I'm still pressing forward.
+
+![Mon Mar 21 Progress](docs/build_log/2022-03-21_10-29-59.png)
+
 ### Mon Mar 7
 
 I continue to build out the case around the thumb cluster.  Adding in bezels will make welding this together a bit easier.

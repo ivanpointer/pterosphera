@@ -66,11 +66,13 @@ module curvedSwitchColumn(colSpec,adjacentColSpec,colNo,colCount,caseBottom,dish
         }
     }
 
-    // Render front wall
-    if(frontWall) colFront(col,adjCol,caseBottom,debug);
+    color("yellow") {
+        // Render front wall
+        if(frontWall) colFront(col,adjCol,caseBottom,debug);
 
-    // Render the back wall
-    colBack(col,adjCol,caseBottom,debug);
+        // Render the back wall
+        colBack(col,adjCol,caseBottom,debug);
+    }
 }
 
 module caseEdge(col,si,caseBottom,ornt,frontWall) {
