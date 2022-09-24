@@ -78,7 +78,8 @@ module keyboardHalf(handSpec,colWidth,thumbClusterAlignCol,debug=false) {
     // Render the dish
     colCount = len(colSpecs);
     for(ci=[0:colCount-1]) {
-        frontWall = ci < thumbClusterAlignCol - 1;
+        // frontWall = ci < thumbClusterAlignCol - 1;
+        frontWall = 1 == 1;
         curvedSwitchColumn(colSpecs[ci], (ci < colCount - 1 ? colSpecs[ci+1] : []), ci, colCount, caseBottom, dishRot, frontWall, debug);
     }
 
@@ -94,7 +95,7 @@ module keyboardHalf(handSpec,colWidth,thumbClusterAlignCol,debug=false) {
     // Render the thumb cluster
     thumbJointRadius = 73.8;
     thumbTipRadius = 14.3;
-    thumbCluster(
+    * thumbCluster(
         thumbJointRadius  // thumb joint radius
         ,thumbTipRadius // thumb tip radius
         ,5   // outer Z offset

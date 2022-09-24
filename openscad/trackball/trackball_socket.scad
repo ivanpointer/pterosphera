@@ -33,7 +33,7 @@ echo("Top Plate Hole Radius (top, bottom)", _tp_hole_r_top, _tp_hole_r_btm);
 
 // Sensor Mount
 sm_color = "blue";
-sm_scrw_dist = 24; // Distance between centers on screw mounts
+sm_scrw_dist = 23.6; // Distance between centers on screw mounts
 sm_scrw_dia_top = 3.1; // Top dia for screw insert hole
 sm_scrw_dia_btm = 2.8; // Bottom dia for screw insert hole
 sm_scrw_mgn = 1.1; // The margin around the screw holes

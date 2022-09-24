@@ -1,0 +1,13 @@
+# ninja log v5
+32	71	1664049176960427565	prototype	8a1b6a011feca686
+0	34	1664057361141095009	CMakeFiles/prototype.dir/main.c.o	1f2e2d1edd00e6bc
+26	278	1664055760765126000	keymatrix/libkeymatrix.a	8c15914c3483e428
+0	26	1664055760511840204	keymatrix/CMakeFiles/keymatrix.dir/kmx.c.o	45e1c625389abece
+0	34	1664057361140897469	CMakeFiles/prototype.dir/keymatrix/kmx.c.o	56263773ade6c13e
+0	41	1664057985881004970	build.ninja	de1be6411bd6d98
+0	39	1664057985881004970	build.ninja	de1be6411bd6d98
+1	24	1664057985910553692	CMakeFiles/prototype.dir/keymatrix/kmx.c.o	56263773ade6c13e
+24	62	1664057985948090214	prototype	ad38cf4b943bbac4
+0	28	1664058022768409905	CMakeFiles/prototype.dir/keymatrix/kmx.c.o	56263773ade6c13e
+0	30	1664058022770614259	CMakeFiles/prototype.dir/main.c.o	1f2e2d1edd00e6bc
+30	70	1664058022810866005	prototype	ad38cf4b943bbac4

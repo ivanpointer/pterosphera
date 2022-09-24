@@ -1,0 +1,3 @@
+/Users/ipointer/Source/pterosphera/firmware/prototype/cmake-build-debug/CMakeFiles/prototype.dir
+/Users/ipointer/Source/pterosphera/firmware/prototype/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/ipointer/Source/pterosphera/firmware/prototype/cmake-build-debug/CMakeFiles/rebuild_cache.dir
